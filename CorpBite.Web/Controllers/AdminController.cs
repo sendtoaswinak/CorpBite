@@ -1,4 +1,4 @@
-﻿using CorpBite.Web;
+﻿using CorpBite.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,9 +9,9 @@ using System.Threading.Tasks;
 [Authorize(Roles = "Admin")]
 public class AdminController : Controller
 {
-    private readonly ApplicationDbContext _context;
+    private readonly AppDbContext _context;
 
-    public AdminController(ApplicationDbContext context)
+    public AdminController(AppDbContext context)
     {
         _context = context;
     }

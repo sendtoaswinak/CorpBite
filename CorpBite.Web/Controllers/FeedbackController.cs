@@ -1,139 +1,115 @@
-﻿using CorpBite.Web.Models;
+﻿using CorpBite.Data;
+using CorpBite.Models;
+using CorpBite.ViewModels.FeedbackViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
-namespace CorpBite.Web.Controllers
+namespace CorpBite.Controllers
 {
     [Authorize]
     public class FeedbackController : Controller
     {
-        private readonly ApplicationDbContext _context;
-        private readonly DateTime _currentDateTime = DateTime.Parse("2025-03-14 07:37:32");
-        private readonly string _currentUser = "sendtoaswinak";
+        private readonly AppDbContext _context;
 
-        public FeedbackController(ApplicationDbContext context)
+        public FeedbackController(AppDbContext context)
         {
             _context = context;
         }
 
-        [HttpPost]
-        public async Task<IActionResult> SubmitOrderFeedback(OrderFeedbackViewModel model)
-        {
-            if (!ModelState.IsValid)
-                return Json(new { success = false, message = "Invalid feedback data" });
-
-            var order = await _context.Orders
-                .Include(o => o.Feedback)
-                .FirstOrDefaultAsync(o => o.Id == model.OrderId && o.UserId == _currentUser);
-
-            if (order == null)
-                return Json(new { success = false, message = "Order not found" });
-
-            if (order.Feedback != null)
-                return Json(new { success = false, message = "Feedback already submitted" });
-
-            var feedback = new Feedback
-            {
-                OrderId = order.Id,
-                UserId = _currentUser,
-                Rating = model.Rating,
-                Comment = model.Comment,
-                CreatedAt = _currentDateTime,
-                CreatedBy = _currentUser
-            };
-
-            _context.Feedbacks.Add(feedback);
-            await _context.SaveChangesAsync();
-
-            // Update order status if needed
-            order.HasFeedback = true;
-            await _context.SaveChangesAsync();
-
-            return Json(new { success = true, message = "Feedback submitted successfully" });
-        }
-
-        [HttpPost]
-        public async Task<IActionResult> SubmitItemFeedback(MenuItemFeedbackViewModel model)
-        {
-            if (!ModelState.IsValid)
-                return Json(new { success = false, message = "Invalid feedback data" });
-
-            var menuItem = await _context.MenuItems
-                .FirstOrDefaultAsync(mi => mi.Id == model.MenuItemId);
-
-            if (menuItem == null)
-                return Json(new { success = false, message = "Menu item not found" });
-
-            // Check if user already submitted feedback for this item
-            var existingFeedback = await _context.Feedbacks
-                .FirstOrDefaultAsync(f => f.MenuItemId == model.MenuItemId && f.UserId == _currentUser);
-
-            if (existingFeedback != null)
-            {
-                existingFeedback.Rating = model.Rating;
-                existingFeedback.Comment = model.Comment;
-                existingFeedback.UpdatedAt = _currentDateTime;
-                existingFeedback.UpdatedBy = _currentUser;
-            }
-            else
-            {
-                var feedback = new Feedback
-                {
-                    MenuItemId = model.MenuItemId,
-                    UserId = _currentUser,
-                    Rating = model.Rating,
-                    Comment = model.Comment,
-                    CreatedAt = _currentDateTime,
-                    CreatedBy = _currentUser
-                };
-                _context.Feedbacks.Add(feedback);
-            }
-
-            await _context.SaveChangesAsync();
-
-            // Update menu item rating
-            var averageRating = await _context.Feedbacks
-                .Where(f => f.MenuItemId == model.MenuItemId)
-                .AverageAsync(f => f.Rating);
-
-            menuItem.Rating = averageRating;
-            menuItem.ReviewCount = await _context.Feedbacks
-                .CountAsync(f => f.MenuItemId == model.MenuItemId);
-
-            await _context.SaveChangesAsync();
-
-            return Json(new { success = true, message = "Feedback submitted successfully" });
-        }
-
         [HttpGet]
-        public async Task<IActionResult> GetItemFeedbacks(int menuItemId, int page = 1)
+        public async Task<IActionResult> Submit(int? menuItemId)
         {
-            int pageSize = 10;
-            var feedbacks = await _context.Feedbacks
-                .Include(f => f.User)
-                .Where(f => f.MenuItemId == menuItemId)
-                .OrderByDescending(f => f.CreatedAt)
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .Select(f => new FeedbackViewModel
+            var viewModel = new FeedbackViewModel();
+            if (menuItemId.HasValue)
+            {
+                var menuItem = await _context.MenuItems.FindAsync(menuItemId);
+                if (menuItem != null)
                 {
-                    UserName = f.User.Name,
-                    Rating = f.Rating,
-                    Comment = f.Comment,
-                    CreatedAt = f.CreatedAt
-                })
+                    viewModel.MenuItemId = menuItem.Id;
+                    viewModel.MenuItemName = menuItem.Name;
+                }
+            }
+
+            // Populate the dropdown for menu items
+            ViewBag.MenuItems = new SelectList(await _context.MenuItems.ToListAsync(), "Id", "Name", viewModel.MenuItemId);
+
+            return View(viewModel);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Submit(FeedbackViewModel model)
+        {
+            if (ModelState.IsValid)
+            {
+                var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+                var feedback = new Review
+                {
+                    UserId = userId,
+                    MenuItemId = model.MenuItemId,
+                    Rating = model.Rating,
+                    Comment = model.Comment
+                };
+
+                _context.Reviews.Add(feedback);
+                await _context.SaveChangesAsync();
+
+                ViewBag.Message = "Thank you for your feedback!";
+                // Optionally redirect to a confirmation page or back to the menu
+                return View(model);
+            }
+
+            // Repopulate the dropdown if the model is invalid
+            ViewBag.MenuItems = new SelectList(await _context.MenuItems.ToListAsync(), "Id", "Name", model.MenuItemId);
+            return View(model);
+        }
+
+        [Authorize(Roles = "Employee")]
+        [HttpGet]
+        public async Task<IActionResult> ViewEmployeeFeedback()
+        {
+            var employeeId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            // For now, let's show all feedback to employees (as per requirement "Employees can view other employee reviews")
+            var feedback = await _context.Reviews
+                .Include(r => r.User)
+                .Include(r => r.MenuItem)
+                .OrderByDescending(r => r.CreatedOn)
                 .ToListAsync();
 
-            var totalCount = await _context.Feedbacks
-                .CountAsync(f => f.MenuItemId == menuItemId);
+            return View(feedback);
+        }
 
-            return Json(new
+        [Authorize(Roles = "Admin")]
+        [HttpGet]
+        public async Task<IActionResult> ViewAdminFeedback()
+        {
+            // Admin can view all feedback
+            var feedback = await _context.Reviews
+                .Include(r => r.User)
+                .Include(r => r.MenuItem)
+                .OrderByDescending(r => r.CreatedOn)
+                .ToListAsync();
+
+            return View(feedback);
+        }
+
+        [Authorize(Roles = "Admin")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteReview(int id)
+        {
+            var review = await _context.Reviews.FindAsync(id);
+            if (review != null)
             {
-                feedbacks,
-                totalPages = (int)Math.Ceiling(totalCount / (double)pageSize),
-                currentPage = page
-            });
+                _context.Reviews.Remove(review);
+                await _context.SaveChangesAsync();
+            }
+            return RedirectToAction("ViewAdminFeedback");
         }
     }
 }

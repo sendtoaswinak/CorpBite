@@ -1,0 +1,43 @@
+﻿@model List<CorpBite.Models.Restaurant>
+
+@{
+	ViewData["Title"] = "Manage Restaurants";
+}
+
+<div class="container mt-5">
+	<h2>@ViewData["Title"]</h2>
+	<hr />
+	<p>
+		<a asp-action="Create" class="btn btn-success">Create New Restaurant</a>
+	</p>
+	@if (Model != null && Model.Any())
+	{
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th>Location</th>
+					<th>Actions</th>
+				</tr>
+			</thead>
+			<tbody>
+				@foreach (var restaurant in Model)
+				{
+					<tr>
+						<td>@restaurant.Name</td>
+						<td>@restaurant.Location?.BuildingName - Floor @restaurant.Location?.FloorNumber</td>
+						<td>
+							<a asp-action="Edit" asp-route-id="@restaurant.Id" class="btn btn-sm btn-primary">Edit</a>
+							<a asp-action="Delete" asp-route-id="@restaurant.Id" class="btn btn-sm btn-danger">Delete</a>
+							<a asp-action="Menu" asp-route-restaurantId="@restaurant.Id" class="btn btn-sm btn-info">Manage Menu</a>
+						</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	}
+	else
+	{
+		<p>No restaurants found.</p>
+	}
+</div>

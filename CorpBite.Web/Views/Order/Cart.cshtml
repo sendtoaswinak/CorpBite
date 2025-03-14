@@ -1,217 +1,89 @@
-﻿@model CartViewModel
+﻿@model List<CartItemViewModel>
+
 @{
-    ViewData["Title"] = "Shopping Cart";
-    var minTime = DateTime.UtcNow.AddMinutes(30);
+	ViewData["Title"] = "Shopping Cart";
 }
 
-<div class="container">
-    <div class="row">
-        <!-- Cart Items -->
-        <div class="col-md-8">
-            <div class="card shadow-sm mb-4">
-                <div class="card-body">
-                    <h2 class="card-title mb-4">Shopping Cart</h2>
+<div class="container mt-5">
+	<h2>@ViewData["Title"]</h2>
+	@if (Model != null && Model.Any())
+	{
+		<table class="table">
+			<thead>
+				<tr>
+					<th>Item</th>
+					<th>Price</th>
+					<th>Quantity</th>
+					<th>Total</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+				@foreach (var item in Model)
+				{
+					<tr>
+						<td>@item.MenuItemName</td>
+						<td>@item.Price.ToString("C")</td>
+						<td>
+							<form asp-action="UpdateCartItem" method="post">
+								<input type="hidden" name="menuItemId" value="@item.MenuItemId" />
+								<input type="number" name="quantity" value="@item.Quantity" class="form-control form-control-sm" style="width: 70px;" min="1" />
+								<button type="submit" class="btn btn-sm btn-outline-secondary">Update</button>
+							</form>
+						</td>
+						<td>@((item.Price * item.Quantity).ToString("C"))</td>
+						<td>
+							<form asp-action="RemoveFromCart" method="post">
+								<input type="hidden" name="menuItemId" value="@item.MenuItemId" />
+								<button type="submit" class="btn btn-sm btn-danger">Remove</button>
+							</form>
+						</td>
+					</tr>
+				}
+			</tbody>
+			<tfoot>
+				<tr>
+					<td colspan="3"><strong>Total:</strong></td>
+					<td><strong>@Model.Sum(item => item.Price * item.Quantity).ToString("C")</strong></td>
+					<td></td>
+				</tr>
+			</tfoot>
+		</table>
+		<div>
+			<a asp-action="Create" class="btn btn-secondary">Continue Shopping</a>
+			<a asp-action="ScheduleOrder" class="btn btn-warning">Schedule Order</a>
+			<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paymentModal">Checkout</button>
+		</div>
 
-                    @foreach (var item in Model.Items)
-                    {
-                        <div class="card mb-3 cart-item" data-id="@item.Id">
-                            <div class="card-body">
-                                <div class="row align-items-center">
-                                    <div class="col-md-6">
-                                        <h5 class="card-title mb-1">@item.ItemName</h5>
-                                        <p class="text-muted mb-0">@item.FoodCourtName</p>
-                                        <span class="@(item.IsVeg ? "veg-badge" : "non-veg-badge") mt-2">
-                                            @(item.IsVeg ? "Veg" : "Non-Veg")
-                                        </span>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="input-group">
-                                            <button class="btn btn-outline-secondary decrease-quantity" 
-                                                    type="button" data-id="@item.Id">-</button>
-                                            <input type="number" class="form-control text-center item-quantity" 
-                                                   value="@item.Quantity" min="1" data-id="@item.Id">
-                                            <button class="btn btn-outline-secondary increase-quantity" 
-                                                    type="button" data-id="@item.Id">+</button>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-2 text-end">
-                                        <p class="mb-0">₹@item.UnitPrice</p>
-                                        <p class="mb-0 fw-bold">₹@item.TotalPrice</p>
-                                    </div>
-                                    <div class="col-md-1 text-end">
-                                        <button class="btn btn-link text-danger remove-item" data-id="@item.Id">
-                                            <i class="bi bi-trash"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                @if (!string.IsNullOrEmpty(item.SpecialInstructions))
-                                {
-                                    <div class="mt-2">
-                                        <small class="text-muted">
-                                            <i class="bi bi-info-circle"></i> @item.SpecialInstructions
-                                        </small>
-                                    </div>
-                                }
-                            </div>
-                        </div>
-                    }
-                </div>
-            </div>
-        </div>
-
-        <!-- Order Summary -->
-        <div class="col-md-4">
-            <div class="card shadow-sm mb-4 sticky-top" style="top: 1rem;">
-                <div class="card-body">
-                    <h3 class="card-title mb-4">Order Summary</h3>
-                    
-                    <div class="mb-4">
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" id="scheduleLater" 
-                                   @(Model.ScheduledTime.HasValue ? "checked" : "")>
-                            <label class="form-check-label" for="scheduleLater">
-                                Schedule for Later
-                            </label>
-                        </div>
-                        <div id="scheduleTimeDiv" class="@(Model.ScheduledTime.HasValue ? "" : "d-none")">
-                            <select class="form-select" id="scheduleTime">
-                                <option value="">Select Time</option>
-                                @foreach (var slot in Model.AvailableTimeSlots)
-                                {
-                                    <option value="@slot.StartTime.ToString("yyyy-MM-dd HH:mm:ss")"
-                                            @(Model.ScheduledTime.HasValue && Model.ScheduledTime.Value == slot.StartTime ? "selected" : "")
-                                            @(!slot.IsAvailable ? "disabled" : "")>
-                                        @slot.StartTime.ToString("hh:mm tt")
-                                    </option>
-                                }
-                            </select>
-                        </div>
-                    </div>
-
-                    <div class="mb-4">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="bulkOrder" 
-                                   @(Model.IsBulkOrder ? "checked" : "")>
-                            <label class="form-check-label" for="bulkOrder">
-                                Bulk Order
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="d-flex justify-content-between mb-2">
-                        <span>Subtotal</span>
-                        <span>₹@Model.SubTotal.ToString("F2")</span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-3">
-                        <span>Tax (5%)</span>
-                        <span>₹@Model.Tax.ToString("F2")</span>
-                    </div>
-                    <div class="d-flex justify-content-between mb-4">
-                        <span class="fw-bold">Total</span>
-                        <span class="fw-bold">₹@Model.Total.ToString("F2")</span>
-                    </div>
-
-                    <div class="d-grid gap-2">
-                        <button class="btn btn-corp" id="checkoutBtn">
-                            Proceed to Checkout
-                        </button>
-                        <a asp-controller="Menu" asp-action="Index" class="btn btn-outline-secondary">
-                            Continue Shopping
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+		<div class="modal fade" id="paymentModal" tabindex="-1" aria-labelledby="paymentModalLabel" aria-hidden="true">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="paymentModalLabel">Choose Payment Method</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+					</div>
+					<div class="modal-body">
+						<form asp-action="Checkout" method="post">
+							<div class="mb-3">
+								<label class="form-label">Select Payment Method:</label>
+								<select class="form-select" name="paymentMethod">
+									<option value="Credit Card">Credit Card</option>
+									<option value="UPI">UPI</option>
+									<option value="Wallet">Wallet</option>
+								</select>
+							</div>
+							<button type="submit" class="btn btn-primary">Proceed to Checkout</button>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	}
+	else
+	{
+		<p>Your cart is empty.</p>
+		<div>
+			<a asp-action="Create" class="btn btn-primary">Browse Food Courts</a>
+		</div>
+	}
 </div>
-
-@section Scripts {
-    <script>
-        $(document).ready(function () {
-            // Quantity controls
-            $('.decrease-quantity, .increase-quantity').click(function () {
-                var id = $(this).data('id');
-                var input = $('.item-quantity[data-id="' + id + '"]');
-                var currentValue = parseInt(input.val());
-                
-                if ($(this).hasClass('decrease-quantity')) {
-                    if (currentValue > 1) input.val(currentValue - 1);
-                } else {
-                    input.val(currentValue + 1);
-                }
-                
-                updateCartItem(id, input.val());
-            });
-
-            // Manual quantity input
-            $('.item-quantity').change(function () {
-                var id = $(this).data('id');
-                var quantity = parseInt($(this).val());
-                if (quantity < 1) {
-                    $(this).val(1);
-                    quantity = 1;
-                }
-                updateCartItem(id, quantity);
-            });
-
-            // Remove item
-            $('.remove-item').click(function () {
-                var id = $(this).data('id');
-                updateCartItem(id, 0);
-            });
-
-            function updateCartItem(id, quantity) {
-                $.post('/Order/UpdateCartItem', { cartItemId: id, quantity: quantity }, function (data) {
-                    if (data.success) {
-                        if (quantity === 0) {
-                            $('.cart-item[data-id="' + id + '"]').remove();
-                        }
-                        updateOrderSummary(data.data);
-                    }
-                });
-            }
-
-            function updateOrderSummary(data) {
-                $('.subtotal').text('₹' + data.subTotal.toFixed(2));
-                $('.tax').text('₹' + data.tax.toFixed(2));
-                $('.total').text('₹' + data.total.toFixed(2));
-                $('.cart-count').text(data.itemCount);
-
-                if (data.itemCount === 0) {
-                    window.location.reload();
-                }
-            }
-
-            // Schedule time handling
-            $('#scheduleLater').change(function () {
-                $('#scheduleTimeDiv').toggleClass('d-none', !this.checked);
-                if (!this.checked) {
-                    $('#scheduleTime').val('');
-                    updateScheduledTime(null);
-                }
-            });
-
-            $('#scheduleTime').change(function () {
-                updateScheduledTime($(this).val());
-            });
-
-            function updateScheduledTime(time) {
-                $.post('/Order/UpdateScheduledTime', { scheduledTime: time });
-            }
-
-            // Bulk order handling
-            $('#bulkOrder').change(function () {
-                $.post('/Order/UpdateBulkOrder', { isBulkOrder: this.checked });
-            });
-
-            // Checkout
-            $('#checkoutBtn').click(function () {
-                if ($('#scheduleLater').is(':checked') && !$('#scheduleTime').val()) {
-                    alert('Please select a delivery time');
-                    return;
-                }
-                $('#checkoutForm').submit();
-            });
-        });
-    </script>
-}

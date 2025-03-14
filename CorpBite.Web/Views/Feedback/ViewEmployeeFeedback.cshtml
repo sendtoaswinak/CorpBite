@@ -1,0 +1,40 @@
+﻿@model List<Review>
+
+@{
+	ViewData["Title"] = "Employee Feedback";
+}
+
+<div class="container mt-5">
+	<h2>@ViewData["Title"]</h2>
+	<hr />
+	@if (Model != null && Model.Any())
+	{
+		<table class="table">
+			<thead>
+				<tr>
+					<th>User</th>
+					<th>Menu Item</th>
+					<th>Rating</th>
+					<th>Comment</th>
+					<th>Date</th>
+				</tr>
+			</thead>
+			<tbody>
+				@foreach (var review in Model)
+				{
+					<tr>
+						<td>@review.User.FirstName @review.User.LastName</td>
+						<td>@review.MenuItem.Name</td>
+						<td>@review.Rating</td>
+						<td>@review.Comment</td>
+						<td>@review.CreatedOn.ToString("dd-MMM-yyyy")</td>
+					</tr>
+				}
+			</tbody>
+		</table>
+	}
+	else
+	{
+		<p>No feedback available.</p>
+	}
+</div>

@@ -1,18 +1,19 @@
-﻿using CorpBite.Web.Models;
+﻿using CorpBite.Data;
+using CorpBite.Web.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace CorpBite.Web.Controllers
+namespace CorpBite.Controllers
 {
     [Authorize]
     public class MenuController : Controller
     {
-        private readonly ApplicationDbContext _context;
+        private readonly AppDbContext _context;
         private readonly DateTime _currentDateTime = DateTime.Parse("2025-03-14 07:36:01");
         private readonly string _currentUser = "sendtoaswinak";
 
-        public MenuController(ApplicationDbContext context)
+        public MenuController(AppDbContext context)
         {
             _context = context;
         }

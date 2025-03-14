@@ -1,0 +1,24 @@
+﻿@model DateTime?
+
+@{
+	ViewData["Title"] = "Schedule Order";
+}
+
+<div class="container mt-5">
+	<h2>@ViewData["Title"]</h2>
+	<hr />
+	<form asp-action="ScheduleOrder" method="post">
+		<div asp-validation-summary="ModelOnly" class="text-danger"></div>
+		<div class="mb-3">
+			<label for="scheduledTime" class="form-label">Schedule Time:</label>
+			<input type="datetime-local" id="scheduledTime" name="scheduledTime" class="form-control" />
+			<span asp-validation-for="scheduledTime" class="text-danger"></span>
+		</div>
+		<button type="submit" class="btn btn-primary">Schedule Order</button> |
+		<a asp-action="Cart" class="btn btn-secondary">Back to Cart</a>
+	</form>
+</div>
+
+@section Scripts {
+	<partial name="_ValidationScriptsPartial" />
+}

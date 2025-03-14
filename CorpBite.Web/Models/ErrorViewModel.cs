@@ -1,4 +1,4 @@
-namespace CorpBite.Web.Models
+namespace CorpBite.Models
 {
     public class ErrorViewModel
     {

@@ -1,17 +1,18 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using CorpBite.Web.ViewModels.Location;
+using CorpBite.Web.ViewModels.Menu;
+using Microsoft.AspNetCore.Authorization;
+using CorpBite.Data;
 
-namespace CorpBite.Web.Controllers
+namespace CorpBite.Controllers
 {
     [Authorize]
     public class LocationController : Controller
     {
-        private readonly ApplicationDbContext _context;
-        private readonly DateTime _currentDateTime = DateTime.Parse("2025-03-14 07:36:01");
-        private readonly string _currentUser = "sendtoaswinak";
+        private readonly AppDbContext _context;
 
-        public LocationController(ApplicationDbContext context)
+        public LocationController(AppDbContext context)
         {
             _context = context;
         }
@@ -23,27 +24,26 @@ namespace CorpBite.Web.Controllers
                 .Include(l => l.FoodCourts.Where(fc => fc.IsActive))
                 .OrderBy(l => l.BuildingName)
                 .ThenBy(l => l.FloorNumber)
+                .Select(l => new LocationViewModel
+                {
+                    Id = l.Id,
+                    BuildingName = l.BuildingName,
+                    FloorNumber = l.FloorNumber,
+                    Description = l.Description,
+                    FoodCourts = l.FoodCourts.Select(fc => new FoodCourtBasicViewModel
+                    {
+                        Id = fc.Id,
+                        Name = fc.Name,
+                        ImageUrl = fc.ImageUrl,
+                        IsVeg = fc.IsVeg,
+                        IsNonVeg = fc.IsNonVeg,
+                        Rating = fc.Rating,
+                        TotalReviews = fc.TotalReviews
+                    }).ToList()
+                })
                 .ToListAsync();
 
-            var viewModel = locations.Select(l => new LocationViewModel
-            {
-                Id = l.Id,
-                BuildingName = l.BuildingName,
-                FloorNumber = l.FloorNumber,
-                Description = l.Description,
-                FoodCourts = l.FoodCourts.Select(fc => new FoodCourtBasicViewModel
-                {
-                    Id = fc.Id,
-                    Name = fc.Name,
-                    ImageUrl = fc.ImageUrl,
-                    IsVeg = fc.IsVeg,
-                    IsNonVeg = fc.IsNonVeg,
-                    Rating = fc.Rating,
-                    TotalReviews = fc.TotalReviews
-                }).ToList()
-            }).ToList();
-
-            return View(viewModel);
+            return View(locations);
         }
 
         public async Task<IActionResult> Details(int id)

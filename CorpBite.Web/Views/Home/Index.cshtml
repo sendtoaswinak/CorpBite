@@ -1,146 +1,58 @@
-﻿@model CorpBite.Models.ViewModels.HomeViewModel
-@{
-	ViewData["Title"] = "Welcome to CorpBite";
+﻿@{
+	ViewData["Title"] = "Home Page";
 }
 
-<div class="container">
-	<!-- Hero Section -->
-	<div class="py-5 text-center">
-		<h1 class="display-4 mb-3">Welcome to CorpBite</h1>
-		<p class="lead mb-4">Order from your favorite food courts across campus</p>
+<div class="container mt-5">
+	<div class="jumbotron bg-light p-5 rounded-lg">
+		<h1 class="display-4">Welcome to CorpBite!</h1>
+		<p class="lead">Your go-to platform for corporate food ordering.</p>
+		<hr class="my-4">
+		<p>Browse delicious meals from your favorite food courts within your office building.</p>
+		@if (!User.Identity.IsAuthenticated)
+		{
+			<p class="lead">
+				<a class="btn btn-primary btn-lg" asp-controller="Auth" asp-action="Register" role="button">Register Now</a> or
+				<a class="btn btn-success btn-lg" asp-controller="Auth" asp-action="Login" role="button">Log In</a>
+			</p>
+		}
+		else
+		{
+			<p class="lead">
+				<a class="btn btn-primary btn-lg" asp-controller="Order" asp-action="Create" role="button">Start Ordering</a>
+			</p>
+		}
 	</div>
 
-	<!-- Featured Food Courts -->
-	@if (Model.FeaturedFoodCourts?.Any() == true)
+	@if (User.Identity.IsAuthenticated)
 	{
-		<section class="mb-5">
-			<h2 class="mb-4">Featured Food Courts</h2>
-			<div class="row g-4">
-				@foreach (var foodCourt in Model.FeaturedFoodCourts)
-				{
-					<div class="col-md-4">
-						<div class="card food-court-card h-100">
-							@if (!string.IsNullOrEmpty(foodCourt.ImageUrl))
-							{
-								<img src="@foodCourt.ImageUrl" class="card-img-top" alt="@foodCourt.Name">
-							}
-							<div class="card-body">
-								<h5 class="card-title">@foodCourt.Name</h5>
-								<p class="card-text text-muted">
-									<i class="bi bi-geo-alt"></i>
-									@foodCourt.Location.BuildingName - Floor @foodCourt.Location.FloorNumber
-								</p>
-								<div class="mb-2">
-									@if (foodCourt.IsVeg)
-									{
-										<span class="badge bg-success me-2">Pure Veg</span>
-									}
-									@if (foodCourt.IsNonVeg)
-									{
-										<span class="badge bg-danger">Non-Veg</span>
-									}
-								</div>
-								<div class="text-warning">
-									@for (int i = 1; i <= 5; i++)
-									{
-										<i class="bi @(i <= Math.Round(foodCourt.Rating) ? "bi-star-fill" : "bi-star")"></i>
-									}
-									<small class="text-muted ms-1">(@foodCourt.TotalReviews reviews)</small>
-								</div>
-							</div>
-							<div class="card-footer bg-transparent">
-								<a asp-controller="Menu" asp-action="Index"
-								   asp-route-foodCourtId="@foodCourt.Id"
-								   class="btn btn-primary w-100">View Menu</a>
-							</div>
-						</div>
+		<div class="row mt-4">
+			<div class="col-md-4">
+				<div class="card">
+					<div class="card-body">
+						<h5 class="card-title">Browse Food Courts</h5>
+						<p class="card-text">View available food options based on your location.</p>
+						<a asp-controller="Order" asp-action="Create" class="btn btn-outline-primary">Browse Now</a>
 					</div>
-				}
-			</div>
-		</section>
-	}
-
-	<!-- Popular Items -->
-	@if (Model.PopularItems?.Any() == true)
-	{
-		<section class="mb-5">
-			<h2 class="mb-4">Popular Items</h2>
-			<div class="row g-4">
-				@foreach (var item in Model.PopularItems)
-				{
-					<div class="col-md-3">
-						<div class="card menu-item-card h-100">
-							@if (!string.IsNullOrEmpty(item.ImageUrl))
-							{
-								<img src="@item.ImageUrl" class="card-img-top" alt="@item.Name">
-							}
-							<div class="card-body">
-								<h5 class="card-title">
-									@item.Name
-									@if (item.IsVeg)
-									{
-										<span class="badge bg-success ms-1">Veg</span>
-									}
-									else
-									{
-										<span class="badge bg-danger ms-1">Non-Veg</span>
-									}
-								</h5>
-								<p class="card-text text-muted">@item.FoodCourtName</p>
-								<div class="text-warning mb-2">
-									@for (int i = 1; i <= 5; i++)
-									{
-										<i class="bi @(i <= Math.Round(item.Rating) ? "bi-star-fill" : "bi-star")"></i>
-									}
-									<small class="text-muted ms-1">(@item.ReviewCount)</small>
-								</div>
-								<h6 class="mb-0">₹@item.Price.ToString("N2")</h6>
-							</div>
-						</div>
-					</div>
-				}
-			</div>
-		</section>
-	}
-
-	<!-- Recent Orders -->
-	@if (User.Identity?.IsAuthenticated == true && Model.RecentOrders?.Any() == true)
-	{
-		<section class="mb-5">
-			<h2 class="mb-4">Your Recent Orders</h2>
-			<div class="row">
-				<div class="col-md-8">
-					@foreach (var order in Model.RecentOrders)
-					{
-						<div class="card mb-3">
-							<div class="card-body">
-								<div class="d-flex justify-content-between align-items-center">
-									<div>
-										<h5 class="card-title mb-1">#@order.OrderNumber</h5>
-										<p class="card-text text-muted mb-1">@order.FoodCourtName</p>
-										<small class="text-muted">
-											@order.OrderDate.ToString("MMM dd, yyyy hh:mm tt")
-										</small>
-									</div>
-									<div class="text-end">
-										<h6 class="mb-2">₹@order.TotalAmount.ToString("N2")</h6>
-										<span class="badge status-@order.OrderStatus.ToLower()">
-											@order.OrderStatus
-										</span>
-									</div>
-								</div>
-							</div>
-							<div class="card-footer bg-transparent">
-								<a asp-controller="Order" asp-action="Details"
-								   asp-route-id="@order.Id"
-								   class="btn btn-outline-primary btn-sm">
-									View Details
-								</a>
-							</div>
-						</div>
-					}
 				</div>
 			</div>
-		</section>
+			<div class="col-md-4">
+				<div class="card">
+					<div class="card-body">
+						<h5 class="card-title">My Cart</h5>
+						<p class="card-text">Review and manage the items in your shopping cart.</p>
+						<a asp-controller="Order" asp-action="Cart" class="btn btn-outline-success">View Cart</a>
+					</div>
+				</div>
+			</div>
+			<div class="col-md-4">
+				<div class="card">
+					<div class="card-body">
+						<h5 class="card-title">Submit Feedback</h5>
+						<p class="card-text">Share your experience and help us improve.</p>
+						<a asp-controller="Feedback" asp-action="Submit" class="btn btn-outline-warning">Give Feedback</a>
+					</div>
+				</div>
+			</div>
+		</div>
 	}
 </div>

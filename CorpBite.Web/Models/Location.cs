@@ -1,16 +1,20 @@
-﻿namespace CorpBite.Web.Models
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+
+namespace CorpBite.Models
 {
     public class Location
     {
         public int Id { get; set; }
+
+        [Required]
         public string BuildingName { get; set; }
-        public int FloorNumber { get; set; }
-        public string Description { get; set; }
-        public bool IsActive { get; set; }
-        public DateTime CreatedAt { get; set; }
-        public string CreatedBy { get; set; }
-        public DateTime? UpdatedAt { get; set; }
-        public string? UpdatedBy { get; set; }
-        public List<FoodCourt> FoodCourts { get; set; } = new();
+
+        [Required]
+        public string FloorNumber { get; set; }
+
+        public ICollection<User> Users { get; set; }
+        public ICollection<Restaurant> Restaurants { get; set; }
+        public ICollection<UserPreference> UserPreferences { get; set; }
     }
 }
