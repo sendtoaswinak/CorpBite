@@ -1,0 +1,157 @@
+﻿@model FoodCourtDetailViewModel
+@{
+	ViewData["Title"] = Model.Name;
+}
+
+<div class="container">
+	<nav aria-label="breadcrumb" class="mb-4">
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item"><a asp-action="Index">Locations</a></li>
+			<li class="breadcrumb-item"><a asp-action="FoodCourts" asp-route-id="@Model.Id">@Model.BuildingName - Floor @Model.FloorNumber</a></li>
+			<li class="breadcrumb-item active">@Model.Name</li>
+		</ol>
+	</nav>
+
+	<div class="row">
+		<!-- Food Court Info -->
+		<div class="col-md-8">
+			<div class="card shadow-sm mb-4">
+				<div class="card-body">
+					<h2 class="card-title">@Model.Name</h2>
+					<div class="mb-3">
+						@if (Model.IsVeg)
+						{
+							<span class="badge bg-success me-2">Pure Veg</span>
+						}
+						@if (Model.IsNonVeg)
+						{
+							<span class="badge bg-danger">Non-Veg Available</span>
+						}
+					</div>
+					<p class="card-text">@Model.Description</p>
+					<div class="row mt-4">
+						<div class="col-md-6">
+							<p><i class="bi bi-telephone me-2"></i>@Model.ContactNumber</p>
+							<p><i class="bi bi-building me-2"></i>@Model.BuildingName - Floor @Model.FloorNumber</p>
+						</div>
+						<div class="col-md-6">
+							<p><i class="bi bi-receipt me-2"></i>GST: @Model.GSTNumber</p>
+							<p>
+								<i class="bi bi-star-fill me-2 text-warning"></i>
+								@Model.Rating.ToString("F1") (@Model.TotalReviews reviews)
+							</p>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Popular Items -->
+			<h3 class="mb-3">Popular Items</h3>
+			<div class="row row-cols-1 row-cols-md-2 g-4 mb-4">
+				@foreach (var item in Model.PopularItems)
+				{
+					<div class="col">
+						<div class="card h-100 shadow-sm">
+							@if (!string.IsNullOrEmpty(item.ImageUrl))
+							{
+								<img src="@item.ImageUrl" class="card-img-top food-item-image" alt="@item.Name">
+							}
+							<div class="card-body">
+								<h5 class="card-title">@item.Name</h5>
+								<div class="d-flex justify-content-between align-items-center">
+									<span class="@(item.IsVeg ? "veg-badge" : "non-veg-badge")">
+										@(item.IsVeg ? "Veg" : "Non-Veg")
+									</span>
+									<h6 class="mb-0">₹@item.Price</h6>
+								</div>
+							</div>
+						</div>
+					</div>
+				}
+			</div>
+
+			<!-- Recent Reviews -->
+			<h3 class="mb-3">Recent Reviews</h3>
+			@if (Model.RecentFeedbacks.Any())
+			{
+				<div class="card shadow-sm">
+					<div class="list-group list-group-flush">
+						@foreach (var feedback in Model.RecentFeedbacks)
+						{
+							<div class="list-group-item">
+								<div class="d-flex justify-content-between align-items-start">
+									<div>
+										<h6 class="mb-1">@feedback.UserName</h6>
+										<div class="rating mb-1">
+											@for (int i = 1; i <= 5; i++)
+											{
+												<i class="bi bi-star@(i <= feedback.Rating ? "-fill" : "") text-warning"></i>
+											}
+										</div>
+										@if (!string.IsNullOrEmpty(feedback.Comment))
+										{
+											<p class="mb-1">@feedback.Comment</p>
+										}
+										<small class="text-muted">
+											@feedback.CreatedAt.ToString("MMM dd, yyyy")
+										</small>
+									</div>
+								</div>
+							</div>
+						}
+					</div>
+				</div>
+			}
+			else
+			{
+				<div class="alert alert-info">
+					<i class="bi bi-info-circle"></i> No reviews yet.
+				</div>
+			}
+		</div>
+
+		<!-- Actions Sidebar -->
+		<div class="col-md-4">
+			<div class="card shadow-sm mb-4">
+				<div class="card-body">
+					<h5 class="card-title">Actions</h5>
+					<div class="d-grid gap-2">
+						<a asp-controller="Menu" asp-action="Index" asp-route-id="@Model.Id"
+						   class="btn btn-corp">
+							<i class="bi bi-list"></i> View Full Menu
+						</a>
+						<a asp-controller="Feedback" asp-action="Create" asp-route-foodCourtId="@Model.Id"
+						   class="btn btn-outline-primary">
+							<i class="bi bi-star"></i> Write a Review
+						</a>
+						<a asp-controller="Order" asp-action="BulkOrder" asp-route-foodCourtId="@Model.Id"
+						   class="btn btn-outline-success">
+							<i class="bi bi-basket"></i> Place Bulk Order
+						</a>
+					</div>
+				</div>
+			</div>
+
+			<!-- Operating Hours -->
+			<div class="card shadow-sm mb-4">
+				<div class="card-body">
+					<h5 class="card-title">Operating Hours</h5>
+					<ul class="list-unstyled">
+						<li class="mb-2">
+							<i class="bi bi-clock me-2"></i>
+							<strong>Breakfast:</strong> 8:00 AM - 10:30 AM
+						</li>
+						<li class="mb-2">
+							<i class="bi bi-clock me-2"></i>
+							<strong>Lunch:</strong> 12:00 PM - 3:30 PM
+						</li>
+						<li>
+							<i class="bi bi-clock me-2"></i>
+							<strong>Snacks:</strong> 4:00 PM - 6:30 PM
+						</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>

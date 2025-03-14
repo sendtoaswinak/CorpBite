@@ -1,0 +1,129 @@
+:root {
+    --primary-color: #0d6efd;
+    --secondary-color: #6c757d;
+    --success-color: #198754;
+    --warning-color: #ffc107;
+    --danger-color: #dc3545;
+}
+
+html {
+    position: relative;
+    min-height: 100%;
+}
+
+body {
+    margin-bottom: 60px;
+    background-color: #f8f9fa;
+}
+
+.footer {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    white-space: nowrap;
+    line-height: 60px;
+}
+
+/* Card hover effects */
+.card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+/* Food court and menu item cards */
+.food-court-card {
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+    .food-court-card img {
+        height: 200px;
+        object-fit: cover;
+    }
+
+.menu-item-card {
+    border: none;
+    border-radius: 10px;
+    background-color: white;
+}
+
+    .menu-item-card img {
+        height: 120px;
+        object-fit: cover;
+        border-radius: 10px 10px 0 0;
+    }
+
+/* Rating stars */
+.rating {
+    color: var(--warning-color);
+}
+
+.rating-input {
+    display: none;
+}
+
+.rating-label {
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: #ddd;
+}
+
+    .rating-label.active {
+        color: var(--warning-color);
+    }
+
+/* Order status badges */
+.status-pending {
+    background-color: var(--warning-color);
+}
+
+.status-confirmed {
+    background-color: var(--primary-color);
+}
+
+.status-completed {
+    background-color: var(--success-color);
+}
+
+.status-cancelled {
+    background-color: var(--danger-color);
+}
+
+/* Loading spinner */
+.loading-spinner {
+    display: none;
+    text-align: center;
+    padding: 20px;
+}
+
+    .loading-spinner.show {
+        display: block;
+    }
+
+/* Responsive images */
+.responsive-img {
+    max-width: 100%;
+    height: auto;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--secondary-color);
+    border-radius: 4px;
+}
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: var(--primary-color);
+    }

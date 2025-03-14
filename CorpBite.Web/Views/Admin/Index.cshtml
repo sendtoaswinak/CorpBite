@@ -1,0 +1,203 @@
+﻿@model AdminDashboardViewModel
+@{
+	ViewData["Title"] = "Admin Dashboard";
+	Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+	<!-- Dashboard Overview -->
+	<div class="row mb-4">
+		<div class="col-md-3">
+			<div class="card shadow-sm bg-primary text-white">
+				<div class="card-body">
+					<h6 class="card-title">Total Orders Today</h6>
+					<h2 class="mb-0">@Model.TodayOrderCount</h2>
+					<small>₹@Model.TodayRevenue.ToString("N2")</small>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="card shadow-sm bg-success text-white">
+				<div class="card-body">
+					<h6 class="card-title">Active Food Courts</h6>
+					<h2 class="mb-0">@Model.ActiveFoodCourts</h2>
+					<small>@Model.TotalMenuItems items available</small>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="card shadow-sm bg-info text-white">
+				<div class="card-body">
+					<h6 class="card-title">Registered Users</h6>
+					<h2 class="mb-0">@Model.RegisteredUsers</h2>
+					<small>@Model.ActiveUsers active today</small>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="card shadow-sm bg-warning text-white">
+				<div class="card-body">
+					<h6 class="card-title">Pending Orders</h6>
+					<h2 class="mb-0">@Model.PendingOrders</h2>
+					<small>@Model.CompletedOrders completed today</small>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Recent Orders & Analytics -->
+	<div class="row">
+		<div class="col-lg-8">
+			<div class="card shadow-sm mb-4">
+				<div class="card-header bg-white">
+					<div class="d-flex justify-content-between align-items-center">
+						<h5 class="mb-0">Recent Orders</h5>
+						<a asp-action="Orders" class="btn btn-outline-primary btn-sm">View All</a>
+					</div>
+				</div>
+				<div class="card-body">
+					<div class="table-responsive">
+						<table class="table table-hover">
+							<thead>
+								<tr>
+									<th>Order #</th>
+									<th>Food Court</th>
+									<th>Customer</th>
+									<th>Amount</th>
+									<th>Status</th>
+									<th>Time</th>
+									<th></th>
+								</tr>
+							</thead>
+							<tbody>
+								@foreach (var order in Model.RecentOrders)
+								{
+									<tr>
+										<td>#@order.OrderNumber</td>
+										<td>@order.FoodCourtName</td>
+										<td>@order.CustomerName</td>
+										<td>₹@order.TotalAmount.ToString("N2")</td>
+										<td>
+											<span class="badge status-@order.OrderStatus.ToLower()">
+												@order.OrderStatus
+											</span>
+										</td>
+										<td>@order.OrderDate.ToString("HH:mm")</td>
+										<td>
+											<a asp-action="OrderDetails" asp-route-id="@order.Id"
+											   class="btn btn-outline-primary btn-sm">
+												Details
+											</a>
+										</td>
+									</tr>
+								}
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+
+			<!-- Revenue Chart -->
+			<div class="card shadow-sm mb-4">
+				<div class="card-header bg-white">
+					<h5 class="mb-0">Revenue Analysis</h5>
+				</div>
+				<div class="card-body">
+					<canvas id="revenueChart" height="300"></canvas>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-lg-4">
+			<!-- Popular Food Courts -->
+			<div class="card shadow-sm mb-4">
+				<div class="card-header bg-white">
+					<h5 class="mb-0">Popular Food Courts</h5>
+				</div>
+				<div class="card-body">
+					@foreach (var fc in Model.PopularFoodCourts)
+					{
+						<div class="d-flex align-items-center mb-3">
+							@if (!string.IsNullOrEmpty(fc.ImageUrl))
+							{
+								<img src="@fc.ImageUrl" class="rounded" width="48" height="48"
+									 style="object-fit: cover;" alt="@fc.Name">
+							}
+							<div class="ms-3">
+								<h6 class="mb-1">@fc.Name</h6>
+								<div class="text-warning small">
+									@for (int i = 1; i <= 5; i++)
+									{
+										<i class="bi @(i <= Math.Round(fc.Rating) ? "bi-star-fill" : "bi-star")"></i>
+									}
+									<span class="text-muted ms-1">(@fc.OrderCount orders)</span>
+								</div>
+							</div>
+						</div>
+					}
+				</div>
+			</div>
+
+			<!-- Latest Reviews -->
+			<div class="card shadow-sm mb-4">
+				<div class="card-header bg-white">
+					<h5 class="mb-0">Latest Reviews</h5>
+				</div>
+				<div class="card-body">
+					@foreach (var review in Model.LatestReviews)
+					{
+						<div class="mb-3">
+							<div class="d-flex justify-content-between align-items-start">
+								<h6 class="mb-1">@review.FoodCourtName</h6>
+								<div class="text-warning">
+									@for (int i = 1; i <= 5; i++)
+									{
+										<i class="bi @(i <= review.Rating ? "bi-star-fill" : "bi-star")"></i>
+									}
+								</div>
+							</div>
+							<p class="small mb-1">@review.Comment</p>
+							<small class="text-muted">
+								@review.CustomerName - @review.CreatedAt.ToString("MMM dd, HH:mm")
+							</small>
+						</div>
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section Scripts {
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+	<script>
+		// Revenue Chart
+		const ctx = document.getElementById('revenueChart').getContext('2d');
+		new Chart(ctx, {
+			type: 'line',
+			data: {
+				labels: @Json.Serialize(Model.RevenueChart.Labels),
+				datasets: [{
+					label: 'Daily Revenue',
+					data: @Json.Serialize(Model.RevenueChart.Data),
+					borderColor: 'rgb(75, 192, 192)',
+					tension: 0.1
+				}]
+			},
+			options: {
+				responsive: true,
+				maintainAspectRatio: false,
+				scales: {
+					y: {
+						beginAtZero: true,
+						ticks: {
+							callback: function(value) {
+								return '₹' + value;
+							}
+						}
+					}
+				}
+			}
+		});
+	</script>
+}

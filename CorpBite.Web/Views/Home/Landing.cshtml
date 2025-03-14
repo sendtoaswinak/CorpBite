@@ -1,0 +1,85 @@
+﻿@model List<FoodCourtViewModel>
+@{
+	ViewData["Title"] = "Welcome to CorpBite";
+}
+
+<div class="container">
+	<!-- Hero Section -->
+	<div class="row mb-5">
+		<div class="col-md-6">
+			<h1 class="display-4">Welcome to CorpBite</h1>
+			<p class="lead">Your corporate food ordering solution - Making lunch breaks better!</p>
+			<div class="mt-4">
+				<a asp-controller="Account" asp-action="Register" class="btn btn-corp btn-lg me-2">Get Started</a>
+				<a asp-controller="Account" asp-action="Login" class="btn btn-outline-dark btn-lg">Login</a>
+			</div>
+		</div>
+		<div class="col-md-6">
+			<img src="~/images/hero-image.jpg" class="img-fluid rounded shadow" alt="Food delivery">
+		</div>
+	</div>
+
+	<!-- Features Section -->
+	<div class="row mb-5">
+		<div class="col-md-4">
+			<div class="card h-100 shadow-sm">
+				<div class="card-body text-center">
+					<i class="bi bi-clock fs-1 text-primary mb-3"></i>
+					<h5 class="card-title">Quick Ordering</h5>
+					<p class="card-text">Order food from your favorite food court in just a few clicks.</p>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-4">
+			<div class="card h-100 shadow-sm">
+				<div class="card-body text-center">
+					<i class="bi bi-geo-alt fs-1 text-success mb-3"></i>
+					<h5 class="card-title">Location Based</h5>
+					<p class="card-text">Find food courts near your office location easily.</p>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-4">
+			<div class="card h-100 shadow-sm">
+				<div class="card-body text-center">
+					<i class="bi bi-calendar-check fs-1 text-warning mb-3"></i>
+					<h5 class="card-title">Schedule Orders</h5>
+					<p class="card-text">Plan your meals ahead with scheduled ordering.</p>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Featured Food Courts -->
+	<h2 class="mb-4">Featured Food Courts</h2>
+	<div class="row row-cols-1 row-cols-md-3 g-4 mb-5">
+		@foreach (var foodCourt in Model)
+		{
+			<div class="col">
+				<div class="card h-100 shadow-sm">
+					<div class="card-body">
+						<h5 class="card-title">@foodCourt.Name</h5>
+						<p class="card-text">@foodCourt.Description</p>
+						<div class="d-flex justify-content-between align-items-center">
+							<div>
+								@if (foodCourt.IsVeg)
+								{
+									<span class="badge bg-success me-2">Veg</span>
+								}
+								@if (foodCourt.IsNonVeg)
+								{
+									<span class="badge bg-danger">Non-Veg</span>
+								}
+							</div>
+							<div class="rating">
+								<i class="bi bi-star-fill"></i>
+								<span>@foodCourt.Rating.ToString("F1")</span>
+							</div>
+						</div>
+						<small class="text-muted">@foodCourt.Location</small>
+					</div>
+				</div>
+			</div>
+		}
+	</div>
+</div>

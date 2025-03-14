@@ -1,0 +1,114 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>@ViewData["Title"] - CorpBite Admin</title>
+	<link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.min.css" />
+	<link rel="stylesheet" href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" />
+	<link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
+</head>
+<body>
+	<div class="wrapper">
+		<!-- Sidebar -->
+		<nav id="sidebar" class="active">
+			<div class="sidebar-header">
+				<img src="~/images/logo.png" alt="CorpBite" height="40" />
+			</div>
+
+			<ul class="list-unstyled components">
+				<li class="@(ViewContext.RouteData.Values["Action"].ToString() == "Index" ? "active" : "")">
+					<a asp-action="Index">
+						<i class="bi bi-speedometer2"></i>
+						<span>Dashboard</span>
+					</a>
+				</li>
+				<li class="@(ViewContext.RouteData.Values["Action"].ToString() == "Orders" ? "active" : "")">
+					<a asp-action="Orders">
+						<i class="bi bi-receipt"></i>
+						<span>Orders</span>
+					</a>
+				</li>
+				<li class="@(ViewContext.RouteData.Values["Action"].ToString() == "FoodCourts" ? "active" : "")">
+					<a asp-action="FoodCourts">
+						<i class="bi bi-shop"></i>
+						<span>Food Courts</span>
+					</a>
+				</li>
+				<li class="@(ViewContext.RouteData.Values["Action"].ToString() == "MenuItems" ? "active" : "")">
+					<a asp-action="MenuItems">
+						<i class="bi bi-menu-button-wide"></i>
+						<span>Menu Items</span>
+					</a>
+				</li>
+				<li class="@(ViewContext.RouteData.Values["Action"].ToString() == "Users" ? "active" : "")">
+					<a asp-action="Users">
+						<i class="bi bi-people"></i>
+						<span>Users</span>
+					</a>
+				</li>
+				<li class="@(ViewContext.RouteData.Values["Action"].ToString() == "Reports" ? "active" : "")">
+					<a asp-action="Reports">
+						<i class="bi bi-graph-up"></i>
+						<span>Reports</span>
+					</a>
+				</li>
+			</ul>
+		</nav>
+
+		<!-- Page Content -->
+		<div id="content">
+			<!-- Top Navigation -->
+			<nav class="navbar navbar-expand-lg navbar-light bg-white">
+				<div class="container-fluid">
+					<button type="button" id="sidebarCollapse" class="btn btn-light">
+						<i class="bi bi-list"></i>
+					</button>
+
+					<div class="ms-auto d-flex align-items-center">
+						<div class="dropdown">
+							<button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+								<i class="bi bi-person-circle"></i>
+								<span class="ms-1">@User.Identity?.Name</span>
+							</button>
+							<ul class="dropdown-menu dropdown-menu-end">
+								<li>
+									<form asp-controller="Account" asp-action="Logout" method="post">
+										<button type="submit" class="dropdown-item">
+											<i class="bi bi-box-arrow-right"></i> Logout
+										</button>
+									</form>
+								</li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</nav>
+
+			<!-- Main Content -->
+			<main class="p-4">
+				@if (TempData["SuccessMessage"] != null)
+				{
+					<div class="alert alert-success alert-dismissible fade show" role="alert">
+						@TempData["SuccessMessage"]
+						<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+					</div>
+				}
+				@if (TempData["ErrorMessage"] != null)
+				{
+					<div class="alert alert-danger alert-dismissible fade show" role="alert">
+						@TempData["ErrorMessage"]
+						<button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+					</div>
+				}
+				@RenderBody()
+			</main>
+		</div>
+	</div>
+
+	<script src="~/lib/jquery/jquery.min.js"></script>
+	<script src="~/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+	<script src="~/js/admin.js" asp-append-version="true"></script>
+	@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,234 @@
+﻿@model List<AdminFoodCourtViewModel>
+@{
+	ViewData["Title"] = "Manage Food Courts";
+	Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+	<div class="d-flex justify-content-between align-items-center mb-4">
+		<h1 class="h3 mb-0">Food Courts</h1>
+		<button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addFoodCourtModal">
+			<i class="bi bi-plus-lg"></i> Add Food Court
+		</button>
+	</div>
+
+	<div class="row">
+		@foreach (var foodCourt in Model)
+		{
+			<div class="col-md-6 col-lg-4 mb-4">
+				<div class="card shadow-sm h-100">
+					@if (!string.IsNullOrEmpty(foodCourt.ImageUrl))
+					{
+						<img src="@foodCourt.ImageUrl" class="card-img-top" style="height: 200px; object-fit: cover;" alt="@foodCourt.Name">
+					}
+					<div class="card-body">
+						<div class="d-flex justify-content-between align-items-start mb-2">
+							<h5 class="card-title mb-0">@foodCourt.Name</h5>
+							<div class="form-check form-switch">
+								<input class="form-check-input" type="checkbox"
+								@(foodCourt.IsActive ? "checked" : "")
+									   onchange="toggleFoodCourtStatus(@foodCourt.Id, this.checked)">
+							</div>
+						</div>
+						<p class="text-muted mb-2">
+							<i class="bi bi-geo-alt"></i>
+							@foodCourt.Location.BuildingName - Floor @foodCourt.Location.FloorNumber
+						</p>
+						<div class="mb-2">
+							@if (foodCourt.IsVeg)
+							{
+								<span class="badge bg-success me-2">Pure Veg</span>
+							}
+							@if (foodCourt.IsNonVeg)
+							{
+								<span class="badge bg-danger">Non-Veg</span>
+							}
+						</div>
+						<div class="text-warning mb-3">
+							@for (int i = 1; i <= 5; i++)
+							{
+								<i class="bi @(i <= Math.Round(foodCourt.Rating) ? "bi-star-fill" : "bi-star")"></i>
+							}
+							<small class="text-muted ms-1">(@foodCourt.TotalReviews reviews)</small>
+						</div>
+						<div class="row g-2 mb-3">
+							<div class="col">
+								<div class="border rounded p-2 text-center">
+									<small class="d-block text-muted">Menu Items</small>
+									<strong>@foodCourt.MenuItemCount</strong>
+								</div>
+							</div>
+							<div class="col">
+								<div class="border rounded p-2 text-center">
+									<small class="d-block text-muted">Orders Today</small>
+									<strong>@foodCourt.TodayOrders</strong>
+								</div>
+							</div>
+							<div class="col">
+								<div class="border rounded p-2 text-center">
+									<small class="d-block text-muted">Revenue</small>
+									<strong>₹@foodCourt.TodayRevenue.ToString("N0")</strong>
+								</div>
+							</div>
+						</div>
+						<div class="d-flex gap-2">
+							<button class="btn btn-outline-primary flex-grow-1"
+									onclick="editFoodCourt(@foodCourt.Id)">
+								<i class="bi bi-pencil"></i> Edit
+							</button>
+							<a href="@Url.Action("MenuItems", new { foodCourtId = foodCourt.Id })"
+							   class="btn btn-outline-secondary flex-grow-1">
+								<i class="bi bi-list"></i> Menu
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		}
+	</div>
+</div>
+
+<!-- Add Food Court Modal -->
+<div class="modal fade" id="addFoodCourtModal" tabindex="-1">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<form id="addFoodCourtForm" enctype="multipart/form-data">
+				<div class="modal-header">
+					<h5 class="modal-title">Add New Food Court</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+				</div>
+				<div class="modal-body">
+					<div class="row mb-3">
+						<div class="col-md-6">
+							<label class="form-label">Name</label>
+							<input type="text" class="form-control" name="name" required>
+						</div>
+						<div class="col-md-6">
+							<label class="form-label">Location</label>
+							<select class="form-select" name="locationId" required>
+								@foreach (var location in ViewBag.Locations)
+								{
+									<option value="@location.Id">
+										@location.BuildingName - Floor @location.FloorNumber
+									</option>
+								}
+							</select>
+						</div>
+					</div>
+
+					<div class="row mb-3">
+						<div class="col-md-6">
+							<label class="form-label">Opening Time</label>
+							<input type="time" class="form-control" name="openingTime" required>
+						</div>
+						<div class="col-md-6">
+							<label class="form-label">Closing Time</label>
+							<input type="time" class="form-control" name="closingTime" required>
+						</div>
+					</div>
+
+					<div class="row mb-3">
+						<div class="col-md-6">
+							<label class="form-label">Contact Number</label>
+							<input type="tel" class="form-control" name="contactNumber">
+						</div>
+						<div class="col-md-6">
+							<label class="form-label">GST Number</label>
+							<input type="text" class="form-control" name="gstNumber">
+						</div>
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label">Description</label>
+						<textarea class="form-control" name="description" rows="3"></textarea>
+					</div>
+
+					<div class="mb-3">
+						<label class="form-label">Food Court Image</label>
+						<input type="file" class="form-control" name="image" accept="image/*">
+					</div>
+
+					<div class="row mb-3">
+						<div class="col-md-6">
+							<div class="form-check">
+								<input class="form-check-input" type="checkbox" name="isVeg" id="isVeg">
+								<label class="form-check-label" for="isVeg">Pure Veg</label>
+							</div>
+						</div>
+						<div class="col-md-6">
+							<div class="form-check">
+								<input class="form-check-input" type="checkbox" name="isNonVeg" id="isNonVeg">
+								<label class="form-check-label" for="isNonVeg">Serves Non-Veg</label>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+					<button type="submit" class="btn btn-primary">Add Food Court</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<!-- Edit Food Court Modal -->
+<div class="modal fade" id="editFoodCourtModal" tabindex="-1">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<form id="editFoodCourtForm" enctype="multipart/form-data">
+				<input type="hidden" name="id" id="editFoodCourtId">
+				<!-- Same form fields as Add Modal -->
+			</form>
+		</div>
+	</div>
+</div>
+
+@section Scripts {
+	<script>
+		// Handle food court form submission
+		$('#addFoodCourtForm').on('submit', function(e) {
+			e.preventDefault();
+			const formData = new FormData(this);
+
+			$.ajax({
+				url: '@Url.Action("AddFoodCourt")',
+				type: 'POST',
+				data: formData,
+				processData: false,
+				contentType: false,
+				success: function(response) {
+					if (response.success) {
+						location.reload();
+					} else {
+						showAlert(response.message, 'danger');
+					}
+				},
+				error: function() {
+					showAlert('Failed to add food court', 'danger');
+				}
+			});
+		});
+
+		// Toggle food court status
+		function toggleFoodCourtStatus(id, status) {
+			$.post('@Url.Action("ToggleFoodCourtStatus")', { id, status })
+				.fail(() => {
+					showAlert('Failed to update status', 'danger');
+				});
+		}
+
+		// Load food court data for editing
+		function editFoodCourt(id) {
+			$.get('@Url.Action("GetFoodCourt")', { id })
+				.done(data => {
+					$('#editFoodCourtId').val(data.id);
+					// Populate other fields
+					$('#editFoodCourtModal').modal('show');
+				})
+				.fail(() => {
+					showAlert('Failed to load food court data', 'danger');
+				});
+		}
+	</script>
+}

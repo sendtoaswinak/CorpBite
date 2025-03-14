@@ -1,0 +1,187 @@
+﻿@model CorpBite.ViewModels.Profile.UserProfileViewModel
+@{
+	ViewData["Title"] = "My Profile";
+}
+
+<div class="container">
+	<div class="row">
+		<div class="col-lg-3">
+			<!-- Profile Card -->
+			<div class="card shadow-sm mb-4">
+				<div class="card-body text-center">
+					<div class="mb-3">
+						<div class="rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center"
+							 style="width: 80px; height: 80px; font-size: 2rem;">
+							@Model.Name.Substring(0, 1)
+						</div>
+					</div>
+					<h5 class="card-title mb-1">@Model.Name</h5>
+					<p class="text-muted mb-3">@Model.Department</p>
+					<div class="d-grid">
+						<a asp-action="ChangePassword" class="btn btn-outline-primary">
+							Change Password
+						</a>
+					</div>
+				</div>
+				<div class="card-footer bg-white">
+					<div class="small text-muted">
+						<div class="mb-1">
+							<i class="bi bi-envelope"></i> @Model.Email
+						</div>
+						<div class="mb-1">
+							<i class="bi bi-person-badge"></i> @Model.EmployeeId
+						</div>
+						<div>
+							<i class="bi bi-clock-history"></i> Member since @Model.CreatedAt.ToString("MMM yyyy")
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Account Statistics -->
+			<div class="card shadow-sm">
+				<div class="card-body">
+					<h6 class="card-title mb-3">Account Statistics</h6>
+					<div class="mb-3">
+						<div class="small text-muted">Total Orders</div>
+						<h5 class="mb-0">@Model.TotalOrders</h5>
+					</div>
+					<div class="mb-3">
+						<div class="small text-muted">Favorite Items</div>
+						<h5 class="mb-0">@Model.FavoriteItems.Count</h5>
+					</div>
+					<div>
+						<div class="small text-muted">Last Login</div>
+						<h5 class="mb-0">@Model.LastLoginAt?.ToString("MMM dd, yyyy hh:mm tt")</h5>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="col-lg-9">
+			<!-- Recent Orders -->
+			<div class="card shadow-sm mb-4">
+				<div class="card-header bg-white d-flex justify-content-between align-items-center">
+					<h5 class="mb-0">Recent Orders</h5>
+					<a asp-controller="Order" asp-action="Index" class="btn btn-outline-primary btn-sm">
+						View All Orders
+					</a>
+				</div>
+				<div class="card-body">
+					@if (Model.RecentOrders?.Any() == true)
+					{
+						foreach (var order in Model.RecentOrders)
+						{
+							<div class="d-flex justify-content-between align-items-center mb-3">
+								<div>
+									<h6 class="mb-1">
+										#@order.OrderNumber - @order.FoodCourtName
+									</h6>
+									<small class="text-muted">
+										@order.OrderDate.ToString("MMM dd, yyyy hh:mm tt")
+									</small>
+								</div>
+								<div class="text-end">
+									<h6 class="mb-1">₹@order.TotalAmount.ToString("N2")</h6>
+									<span class="badge status-@order.OrderStatus.ToLower()">
+										@order.OrderStatus
+									</span>
+								</div>
+							</div>
+						}
+					}
+					else
+					{
+						<div class="text-center py-4">
+							<p class="text-muted mb-0">No orders yet</p>
+						</div>
+					}
+				</div>
+			</div>
+
+			<!-- Favorite Items -->
+			<div class="card shadow-sm">
+				<div class="card-header bg-white">
+					<h5 class="mb-0">Favorite Items</h5>
+				</div>
+				<div class="card-body">
+					@if (Model.FavoriteItems?.Any() == true)
+					{
+						<div class="row g-4">
+							@foreach (var item in Model.FavoriteItems)
+							{
+								<div class="col-md-6">
+									<div class="card h-100">
+										<div class="row g-0">
+											@if (!string.IsNullOrEmpty(item.ImageUrl))
+											{
+												<div class="col-4">
+													<img src="@item.ImageUrl" class="img-fluid rounded-start h-100"
+														 style="object-fit: cover;" alt="@item.Name">
+												</div>
+											}
+											<div class="@(string.IsNullOrEmpty(item.ImageUrl) ? "col-12" : "col-8")">
+												<div class="card-body">
+													<h6 class="card-title mb-1">
+														@item.Name
+														@if (item.IsVeg)
+														{
+															<i class="bi bi-circle-fill text-success ms-1" style="font-size: 0.75rem;"></i>
+														}
+														else
+														{
+															<i class="bi bi-circle-fill text-danger ms-1" style="font-size: 0.75rem;"></i>
+														}
+													</h6>
+													<p class="text-muted small mb-2">@item.FoodCourtName</p>
+													<div class="d-flex justify-content-between align-items-center">
+														<h6 class="mb-0">₹@item.Price.ToString("N2")</h6>
+														@if (item.IsAvailable)
+														{
+															<button class="btn btn-primary btn-sm"
+																	onclick="addToCart(@item.MenuItemId)">
+																Add to Cart
+															</button>
+														}
+														else
+														{
+															<span class="badge bg-secondary">Not Available</span>
+														}
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
+							}
+						</div>
+					}
+					else
+					{
+						<div class="text-center py-4">
+							<p class="text-muted mb-0">No favorite items yet</p>
+						</div>
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section Scripts {
+	<script>
+		function addToCart(menuItemId) {
+			cart.addItem(menuItemId, 1)
+				.done(response => {
+					if (response.success) {
+						showAlert('Item added to cart successfully');
+					} else {
+						showAlert(response.message || 'Failed to add item to cart', 'danger');
+					}
+				})
+				.fail(() => {
+					showAlert('Failed to add item to cart', 'danger');
+				});
+		}
+	</script>
+}

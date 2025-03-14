@@ -1,0 +1,250 @@
+﻿@model List<AdminUserViewModel>
+@{
+	ViewData["Title"] = "Manage Users";
+	Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+	<div class="d-flex justify-content-between align-items-center mb-4">
+		<h1 class="h3 mb-0">Users</h1>
+		<div class="d-flex gap-2">
+			<div class="input-group">
+				<input type="text" class="form-control" id="searchInput" placeholder="Search users...">
+				<button class="btn btn-outline-secondary" type="button" onclick="searchUsers()">
+					<i class="bi bi-search"></i>
+				</button>
+			</div>
+			<button class="btn btn-primary" onclick="exportUserData()">
+				<i class="bi bi-download"></i> Export
+			</button>
+		</div>
+	</div>
+
+	<div class="card shadow-sm">
+		<div class="card-body">
+			<div class="table-responsive">
+				<table class="table table-hover" id="usersTable">
+					<thead>
+						<tr>
+							<th onclick="sortTable(this, 'string')">Name</th>
+							<th onclick="sortTable(this, 'string')">Email</th>
+							<th onclick="sortTable(this, 'string')">Employee ID</th>
+							<th onclick="sortTable(this, 'string')">Department</th>
+							<th onclick="sortTable(this, 'date')">Joined</th>
+							<th onclick="sortTable(this, 'number')">Orders</th>
+							<th onclick="sortTable(this, 'date')">Last Active</th>
+							<th>Status</th>
+							<th>Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var user in Model)
+						{
+							<tr>
+								<td>@user.Name</td>
+								<td>@user.Email</td>
+								<td>@user.EmployeeId</td>
+								<td>@user.Department</td>
+								<td>@user.CreatedAt.ToString("MMM dd, yyyy")</td>
+								<td>@user.TotalOrders</td>
+								<td>@user.LastActiveAt?.ToString("MMM dd, yyyy HH:mm")</td>
+								<td>
+									<div class="form-check form-switch">
+										<input class="form-check-input" type="checkbox"
+										@(user.IsActive ? "checked" : "")
+											   onchange="toggleUserStatus(@user.Id, this.checked)">
+									</div>
+								</td>
+								<td>
+									<div class="btn-group">
+										<button type="button" class="btn btn-sm btn-outline-primary"
+												onclick="viewUserDetails(@user.Id)">
+											<i class="bi bi-eye"></i>
+										</button>
+										<button type="button" class="btn btn-sm btn-outline-danger"
+												onclick="resetUserPassword(@user.Id)">
+											<i class="bi bi-key"></i>
+										</button>
+									</div>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- User Details Modal -->
+<div class="modal fade" id="userDetailsModal" tabindex="-1">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">User Details</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body">
+				<div class="row">
+					<div class="col-md-6">
+						<h6>Personal Information</h6>
+						<dl class="row">
+							<dt class="col-sm-4">Name</dt>
+							<dd class="col-sm-8" id="userDetailName"></dd>
+
+							<dt class="col-sm-4">Email</dt>
+							<dd class="col-sm-8" id="userDetailEmail"></dd>
+
+							<dt class="col-sm-4">Employee ID</dt>
+							<dd class="col-sm-8" id="userDetailEmployeeId"></dd>
+
+							<dt class="col-sm-4">Department</dt>
+							<dd class="col-sm-8" id="userDetailDepartment"></dd>
+						</dl>
+					</div>
+					<div class="col-md-6">
+						<h6>Activity Statistics</h6>
+						<dl class="row">
+							<dt class="col-sm-4">Total Orders</dt>
+							<dd class="col-sm-8" id="userDetailOrders"></dd>
+
+							<dt class="col-sm-4">Last Order</dt>
+							<dd class="col-sm-8" id="userDetailLastOrder"></dd>
+
+							<dt class="col-sm-4">Total Spent</dt>
+							<dd class="col-sm-8" id="userDetailTotalSpent"></dd>
+
+							<dt class="col-sm-4">Avg. Rating</dt>
+							<dd class="col-sm-8" id="userDetailRating"></dd>
+						</dl>
+					</div>
+				</div>
+
+				<!-- Recent Orders -->
+				<h6>Recent Orders</h6>
+				<div class="table-responsive">
+					<table class="table table-sm" id="userOrdersTable">
+						<thead>
+							<tr>
+								<th>Order #</th>
+								<th>Date</th>
+								<th>Food Court</th>
+								<th>Amount</th>
+								<th>Status</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+					</table>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section Scripts {
+	<script>
+		function searchUsers() {
+			const searchTerm = $('#searchInput').val().toLowerCase();
+			$('#usersTable tbody tr').each(function() {
+				const text = $(this).text().toLowerCase();
+				$(this).toggle(text.includes(searchTerm));
+			});
+		}
+
+		function sortTable(header, type) {
+			const table = document.getElementById('usersTable');
+			const tbody = table.querySelector('tbody');
+			const rows = Array.from(tbody.querySelectorAll('tr'));
+			const index = header.cellIndex;
+			const direction = header.classList.contains('asc') ? -1 : 1;
+
+			rows.sort((a, b) => {
+				let aVal = a.cells[index].textContent.trim();
+				let bVal = b.cells[index].textContent.trim();
+
+				if (type === 'number') {
+					aVal = parseFloat(aVal.replace(/[₹,]/g, '')) || 0;
+					bVal = parseFloat(bVal.replace(/[₹,]/g, '')) || 0;
+				} else if (type === 'date') {
+					aVal = new Date(aVal);
+					bVal = new Date(bVal);
+				}
+
+				if (aVal < bVal) return -1 * direction;
+				if (aVal > bVal) return 1 * direction;
+				return 0;
+			});
+
+			rows.forEach(row => tbody.appendChild(row));
+
+			table.querySelectorAll('th').forEach(th => th.classList.remove('asc', 'desc'));
+			header.classList.toggle('asc', direction === 1);
+			header.classList.toggle('desc', direction === -1);
+		}
+
+		function toggleUserStatus(userId, status) {
+			$.post('@Url.Action("ToggleUserStatus")', { userId, status })
+				.fail(() => {
+					showAlert('Failed to update user status', 'danger');
+				});
+		}
+
+		function viewUserDetails(userId) {
+			$.get('@Url.Action("GetUserDetails")', { userId })
+				.done(data => {
+					$('#userDetailName').text(data.name);
+					$('#userDetailEmail').text(data.email);
+					$('#userDetailEmployeeId').text(data.employeeId);
+					$('#userDetailDepartment').text(data.department);
+					$('#userDetailOrders').text(data.totalOrders);
+					$('#userDetailLastOrder').text(data.lastOrderDate);
+					$('#userDetailTotalSpent').text('₹' + data.totalSpent.toFixed(2));
+					$('#userDetailRating').text(data.averageRating.toFixed(1) + ' ★');
+
+					const ordersTable = $('#userOrdersTable tbody');
+					ordersTable.empty();
+					data.recentOrders.forEach(order => {
+						ordersTable.append(`
+							<tr>
+								<td>#${order.orderNumber}</td>
+								<td>${new Date(order.orderDate).toLocaleDateString()}</td>
+								<td>${order.foodCourtName}</td>
+								<td>₹${order.totalAmount.toFixed(2)}</td>
+								<td><span class="badge status-${order.status.toLowerCase()}">${order.status}</span></td>
+							</tr>
+						`);
+					});
+
+					$('#userDetailsModal').modal('show');
+				})
+				.fail(() => {
+					showAlert('Failed to load user details', 'danger');
+				});
+		}
+
+		function resetUserPassword(userId) {
+			if (confirm('Are you sure you want to reset this user\'s password?')) {
+				$.post('@Url.Action("ResetUserPassword")', { userId })
+					.done(response => {
+						if (response.success) {
+							showAlert('Password reset email sent to user');
+						} else {
+							showAlert(response.message, 'danger');
+						}
+					})
+					.fail(() => {
+						showAlert('Failed to reset password', 'danger');
+					});
+			}
+		}
+
+		function exportUserData() {
+			window.location.href = '@Url.Action("ExportUsers")';
+		}
+
+		// Initialize search functionality
+		$('#searchInput').on('keyup', function() {
+			searchUsers();
+		});
+	</script>
+}

@@ -1,0 +1,335 @@
+﻿@model AdminOrdersViewModel
+@{
+	ViewData["Title"] = "Manage Orders";
+	Layout = "_AdminLayout";
+}
+
+<div class="container-fluid">
+	<div class="d-flex justify-content-between align-items-center mb-4">
+		<h1 class="h3 mb-0">Orders</h1>
+		<div class="d-flex gap-2">
+			<div class="input-group">
+				<input type="text" class="form-control" id="dateRange" placeholder="Select date range">
+				<button class="btn btn-outline-secondary" type="button" onclick="filterOrders()">
+					<i class="bi bi-funnel"></i>
+				</button>
+			</div>
+			<button class="btn btn-primary" onclick="exportOrders()">
+				<i class="bi bi-download"></i> Export
+			</button>
+		</div>
+	</div>
+
+	<!-- Order Statistics -->
+	<div class="row mb-4">
+		<div class="col-md-3">
+			<div class="card shadow-sm bg-primary text-white">
+				<div class="card-body">
+					<h6 class="card-title">Total Orders</h6>
+					<h2 class="mb-0">@Model.TotalOrders</h2>
+					<small>₹@Model.TotalRevenue.ToString("N2")</small>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="card shadow-sm bg-success text-white">
+				<div class="card-body">
+					<h6 class="card-title">Completed</h6>
+					<h2 class="mb-0">@Model.CompletedOrders</h2>
+					<small>@Model.CompletionRate.ToString("P1")</small>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="card shadow-sm bg-warning text-white">
+				<div class="card-body">
+					<h6 class="card-title">Pending</h6>
+					<h2 class="mb-0">@Model.PendingOrders</h2>
+					<small>Avg. wait @Model.AverageWaitTime.ToString("N0") mins</small>
+				</div>
+			</div>
+		</div>
+		<div class="col-md-3">
+			<div class="card shadow-sm bg-danger text-white">
+				<div class="card-body">
+					<h6 class="card-title">Cancelled</h6>
+					<h2 class="mb-0">@Model.CancelledOrders</h2>
+					<small>@Model.CancellationRate.ToString("P1")</small>
+				</div>
+			</div>
+		</div>
+	</div>
+
+	<!-- Orders Table -->
+	<div class="card shadow-sm">
+		<div class="card-body">
+			<div class="table-responsive">
+				<table class="table table-hover" id="ordersTable">
+					<thead>
+						<tr>
+							<th onclick="sortTable(this, 'string')">Order #</th>
+							<th onclick="sortTable(this, 'string')">Customer</th>
+							<th onclick="sortTable(this, 'string')">Food Court</th>
+							<th onclick="sortTable(this, 'date')">Date</th>
+							<th onclick="sortTable(this, 'number')">Items</th>
+							<th onclick="sortTable(this, 'number')">Amount</th>
+							<th>Status</th>
+							<th>Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var order in Model.Orders)
+						{
+							<tr>
+								<td>#@order.OrderNumber</td>
+								<td>
+									@order.CustomerName
+									<small class="d-block text-muted">@order.EmployeeId</small>
+								</td>
+								<td>@order.FoodCourtName</td>
+								<td>
+									@order.OrderDate.ToString("MMM dd, yyyy HH:mm")
+									@if (order.ScheduledTime.HasValue)
+									{
+										<small class="d-block text-muted">
+											Scheduled: @order.ScheduledTime.Value.ToString("HH:mm")
+										</small>
+									}
+								</td>
+								<td>@order.ItemCount</td>
+								<td>₹@order.TotalAmount.ToString("N2")</td>
+								<td>
+									<span class="badge status-@order.OrderStatus.ToLower()">
+										@order.OrderStatus
+									</span>
+								</td>
+								<td>
+									<div class="btn-group">
+										<button type="button" class="btn btn-sm btn-outline-primary"
+												onclick="viewOrderDetails(@order.Id)">
+											<i class="bi bi-eye"></i>
+										</button>
+										@if (order.OrderStatus == "Pending")
+										{
+											<button type="button" class="btn btn-sm btn-outline-success"
+													onclick="updateOrderStatus(@order.Id, 'Confirmed')">
+												<i class="bi bi-check-lg"></i>
+											</button>
+											<button type="button" class="btn btn-sm btn-outline-danger"
+													onclick="updateOrderStatus(@order.Id, 'Cancelled')">
+												<i class="bi bi-x-lg"></i>
+											</button>
+										}
+										@if (order.OrderStatus == "Confirmed")
+										{
+											<button type="button" class="btn btn-sm btn-outline-success"
+													onclick="updateOrderStatus(@order.Id, 'Completed')">
+												<i class="bi bi-check-circle"></i>
+											</button>
+										}
+									</div>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Order Details Modal -->
+<div class="modal fade" id="orderDetailsModal" tabindex="-1">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Order Details</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+			</div>
+			<div class="modal-body">
+				<div class="row mb-4">
+					<div class="col-md-6">
+						<h6>Order Information</h6>
+						<dl class="row">
+							<dt class="col-sm-4">Order Number</dt>
+							<dd class="col-sm-8" id="orderDetailNumber"></dd>
+
+							<dt class="col-sm-4">Date & Time</dt>
+							<dd class="col-sm-8" id="orderDetailDate"></dd>
+
+							<dt class="col-sm-4">Status</dt>
+							<dd class="col-sm-8" id="orderDetailStatus"></dd>
+
+							<dt class="col-sm-4">Food Court</dt>
+							<dd class="col-sm-8" id="orderDetailFoodCourt"></dd>
+						</dl>
+					</div>
+					<div class="col-md-6">
+						<h6>Customer Information</h6>
+						<dl class="row">
+							<dt class="col-sm-4">Name</dt>
+							<dd class="col-sm-8" id="orderDetailCustomer"></dd>
+
+							<dt class="col-sm-4">Employee ID</dt>
+							<dd class="col-sm-8" id="orderDetailEmployeeId"></dd>
+
+							<dt class="col-sm-4">Department</dt>
+							<dd class="col-sm-8" id="orderDetailDepartment"></dd>
+						</dl>
+					</div>
+				</div>
+
+				<!-- Order Items -->
+				<h6>Order Items</h6>
+				<div class="table-responsive">
+					<table class="table" id="orderItemsTable">
+						<thead>
+							<tr>
+								<th>Item</th>
+								<th>Price</th>
+								<th>Quantity</th>
+								<th>Total</th>
+							</tr>
+						</thead>
+						<tbody></tbody>
+						<tfoot>
+							<tr>
+								<td colspan="3" class="text-end">Subtotal:</td>
+								<td id="orderDetailSubtotal"></td>
+							</tr>
+							<tr>
+								<td colspan="3" class="text-end">Tax (5%):</td>
+								<td id="orderDetailTax"></td>
+							</tr>
+							<tr>
+								<td colspan="3" class="text-end"><strong>Total:</strong></td>
+								<td><strong id="orderDetailTotal"></strong></td>
+							</tr>
+						</tfoot>
+					</table>
+				</div>
+
+				<!-- Special Instructions -->
+				<div id="specialInstructionsSection" class="mt-3" style="display: none;">
+					<h6>Special Instructions</h6>
+					<p id="orderDetailInstructions" class="text-muted"></p>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<div id="orderActionButtons"></div>
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section Scripts {
+	<script src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+	<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+	<script>
+		$(document).ready(function() {
+			// Initialize date range picker
+			$('#dateRange').daterangepicker({
+				ranges: {
+					'Today': [moment(), moment()],
+					'Yesterday': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+					'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+					'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+					'This Month': [moment().startOf('month'), moment().endOf('month')],
+					'Last Month': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')]
+				},
+				startDate: moment().subtract(29, 'days'),
+				endDate: moment()
+			});
+		});
+
+		function filterOrders() {
+			const dateRange = $('#dateRange').val();
+			window.location.href = `@Url.Action("Orders")?dateRange=${dateRange}`;
+		}
+
+		function viewOrderDetails(orderId) {
+			$.get('@Url.Action("GetOrderDetails")', { orderId })
+				.done(data => {
+					$('#orderDetailNumber').text('#' + data.orderNumber);
+					$('#orderDetailDate').text(new Date(data.orderDate).toLocaleString());
+					$('#orderDetailStatus').html(`<span class="badge status-${data.orderStatus.toLowerCase()}">${data.orderStatus}</span>`);
+					$('#orderDetailFoodCourt').text(data.foodCourtName);
+					$('#orderDetailCustomer').text(data.customerName);
+					$('#orderDetailEmployeeId').text(data.employeeId);
+					$('#orderDetailDepartment').text(data.department);
+
+					const itemsTable = $('#orderItemsTable tbody');
+					itemsTable.empty();
+					data.items.forEach(item => {
+						itemsTable.append(`
+							<tr>
+								<td>${item.name}</td>
+								<td>₹${item.price.toFixed(2)}</td>
+								<td>${item.quantity}</td>
+								<td>₹${(item.price * item.quantity).toFixed(2)}</td>
+							</tr>
+						`);
+					});
+
+					$('#orderDetailSubtotal').text('₹' + data.subtotal.toFixed(2));
+					$('#orderDetailTax').text('₹' + data.taxAmount.toFixed(2));
+					$('#orderDetailTotal').text('₹' + data.totalAmount.toFixed(2));
+
+					if (data.specialInstructions) {
+						$('#orderDetailInstructions').text(data.specialInstructions);
+						$('#specialInstructionsSection').show();
+					} else {
+						$('#specialInstructionsSection').hide();
+					}
+
+					// Update action buttons
+					const actionButtons = $('#orderActionButtons');
+					actionButtons.empty();
+					if (data.orderStatus === 'Pending') {
+						actionButtons.append(`
+							<button type="button" class="btn btn-success" onclick="updateOrderStatus(${data.id}, 'Confirmed')">
+								<i class="bi bi-check-lg"></i> Confirm Order
+							</button>
+							<button type="button" class="btn btn-danger" onclick="updateOrderStatus(${data.id}, 'Cancelled')">
+								<i class="bi bi-x-lg"></i> Cancel Order
+							</button>
+						`);
+					} else if (data.orderStatus === 'Confirmed') {
+						actionButtons.append(`
+							<button type="button" class="btn btn-success" onclick="updateOrderStatus(${data.id}, 'Completed')">
+								<i class="bi bi-check-circle"></i> Mark as Completed
+							</button>
+						`);
+					}
+
+					$('#orderDetailsModal').modal('show');
+				})
+				.fail(() => {
+					showAlert('Failed to load order details', 'danger');
+				});
+		}
+
+		function updateOrderStatus(orderId, status) {
+			if (confirm(`Are you sure you want to mark this order as ${status}?`)) {
+				$.post('@Url.Action("UpdateOrderStatus")', { orderId, status })
+					.done(response => {
+						if (response.success) {
+							location.reload();
+						} else {
+							showAlert(response.message, 'danger');
+						}
+					})
+					.fail(() => {
+						showAlert('Failed to update order status', 'danger');
+					});
+			}
+		}
+
+		function exportOrders() {
+			const dateRange = $('#dateRange').val();
+			window.location.href = `@Url.Action("ExportOrders")?dateRange=${dateRange}`;
+		}
+	</script>
+}
