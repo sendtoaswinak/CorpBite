@@ -1,8 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace CorpBite.Web.ViewModels.Admin
+namespace CorpBite.Web.Models.ViewModels.Admin
 {
-    public class MenuItemViewModel
+    public class AdminMenuItemViewModel
     {
         public int Id { get; set; }
 

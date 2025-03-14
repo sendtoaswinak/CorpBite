@@ -1,5 +1,5 @@
 ﻿using CorpBite.Web.Models;
-using CorpBite.Web.ViewModels.Account;
+using CorpBite.Web.Models.ViewModels.Account;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;

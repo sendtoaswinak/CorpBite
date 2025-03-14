@@ -1,4 +1,4 @@
-﻿using CorpBite.Web.ViewModels.Order;
+﻿using CorpBite.Web.Models.ViewModels.Order;
 
 public class OrderHistoryViewModel
 {

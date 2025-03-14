@@ -1,4 +1,4 @@
-﻿namespace CorpBite.Web.ViewModels.Profile
+﻿namespace CorpBite.Web.Models.ViewModels.Profile
 {
     public class UserProfileViewModel
     {

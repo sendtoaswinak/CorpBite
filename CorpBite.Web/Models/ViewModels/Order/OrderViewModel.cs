@@ -1,4 +1,4 @@
-﻿namespace CorpBite.Web.ViewModels.Order
+﻿namespace CorpBite.Web.Models.ViewModels.Order
 {
     public class OrderViewModel
     {

@@ -1,0 +1,164 @@
+﻿@model CorpBite.Models.ViewModels.CartViewModel
+@{
+	ViewData["Title"] = "Shopping Cart";
+}
+
+<div class="container mt-4">
+	<div class="row">
+		<!-- Cart Items -->
+		<div class="col-md-8">
+			<div class="card shadow-sm">
+				<div class="card-header bg-white">
+					<h5 class="mb-0">Your Cart (@Model.ItemCount items)</h5>
+				</div>
+				<div class="card-body">
+					@if (Model.Items.Any())
+					{
+						foreach (var item in Model.Items)
+						{
+							<div class="d-flex align-items-center mb-3 border-bottom pb-3">
+								@if (!string.IsNullOrEmpty(item.ImageUrl))
+								{
+									<img src="@item.ImageUrl" alt="@item.Name"
+										 class="rounded" style="width: 80px; height: 80px; object-fit: cover;">
+								}
+								<div class="ms-3 flex-grow-1">
+									<h6 class="mb-1">@item.Name</h6>
+									<p class="text-muted mb-1 small">@item.FoodCourtName</p>
+									<div class="d-flex align-items-center">
+										<div class="input-group input-group-sm" style="width: 120px;">
+											<button class="btn btn-outline-secondary" type="button"
+													onclick="updateQuantity(@item.Id, -1)">
+												<i class="bi bi-dash"></i>
+											</button>
+											<input type="number" class="form-control text-center"
+												   value="@item.Quantity" min="1" max="10"
+												   onchange="updateQuantity(@item.Id, this.value)">
+											<button class="btn btn-outline-secondary" type="button"
+													onclick="updateQuantity(@item.Id, 1)">
+												<i class="bi bi-plus"></i>
+											</button>
+										</div>
+										<div class="ms-auto">
+											<span class="fw-bold">₹@((item.Price * item.Quantity).ToString("N2"))</span>
+											<button class="btn btn-link text-danger p-0 ms-3"
+													onclick="removeItem(@item.Id)">
+												<i class="bi bi-trash"></i>
+											</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						}
+
+						<div class="text-end mt-3">
+							<a href="@Url.Action("Index", "Menu")" class="btn btn-outline-primary">
+								<i class="bi bi-arrow-left"></i> Continue Shopping
+							</a>
+						</div>
+					}
+					else
+					{
+						<div class="text-center py-5">
+							<i class="bi bi-cart-x display-4 text-muted"></i>
+							<h5 class="mt-3">Your cart is empty</h5>
+							<p class="text-muted">Add some delicious items to your cart</p>
+							<a href="@Url.Action("Index", "Menu")" class="btn btn-primary">
+								Browse Menu <i class="bi bi-arrow-right"></i>
+							</a>
+						</div>
+					}
+				</div>
+			</div>
+		</div>
+
+		<!-- Order Summary -->
+		<div class="col-md-4">
+			<div class="card shadow-sm">
+				<div class="card-header bg-white">
+					<h5 class="mb-0">Order Summary</h5>
+				</div>
+				<div class="card-body">
+					<div class="d-flex justify-content-between mb-2">
+						<span>Subtotal</span>
+						<span>₹@Model.Subtotal.ToString("N2")</span>
+					</div>
+					<div class="d-flex justify-content-between mb-2">
+						<span>Tax (5%)</span>
+						<span>₹@Model.Tax.ToString("N2")</span>
+					</div>
+					<hr>
+					<div class="d-flex justify-content-between mb-3">
+						<strong>Total</strong>
+						<strong>₹@Model.Total.ToString("N2")</strong>
+					</div>
+
+					@if (Model.Items.Any())
+					{
+						<form asp-action="Checkout" method="post">
+							<div class="mb-3">
+								<label class="form-label">Preferred Pickup Time</label>
+								<select class="form-select" name="PickupTime" required>
+									@foreach (var time in Model.AvailablePickupTimes)
+									{
+										<option value="@time.Value">@time.Text</option>
+									}
+								</select>
+							</div>
+							<div class="mb-3">
+								<label class="form-label">Special Instructions</label>
+								<textarea class="form-control" name="Instructions" rows="2"
+										  placeholder="Any special requests?"></textarea>
+							</div>
+							<button type="submit" class="btn btn-primary w-100">
+								Proceed to Checkout
+							</button>
+						</form>
+					}
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+@section Scripts {
+	<script>
+		function updateQuantity(itemId, change) {
+			let input;
+			if (typeof change === 'number') {
+				input = document.querySelector(`input[data-item-id="${itemId}"]`);
+				let newValue = parseInt(input.value) + change;
+				if (newValue < 1 || newValue > 10) return;
+				input.value = newValue;
+			}
+
+			$.post('@Url.Action("UpdateQuantity")', { itemId, quantity: input.value })
+				.done(response => {
+					if (response.success) {
+						location.reload();
+					} else {
+						showAlert(response.message, 'danger');
+					}
+				})
+				.fail(() => {
+					showAlert('Failed to update quantity', 'danger');
+				});
+		}
+
+		function removeItem(itemId) {
+			if (confirm('Are you sure you want to remove this item?')) {
+				$.post('@Url.Action("RemoveItem")', { itemId })
+					.done(response => {
+						if (response.success) {
+							location.reload();
+						} else {
+							showAlert(response.message, 'danger');
+						}
+					})
+					.fail(() => {
+						showAlert('Failed to remove item', 'danger');
+					});
+			}
+		}
+	</script>
+}
