@@ -1,4 +1,5 @@
-﻿using CorpBite.Data;
+﻿// RestaurantController.cs
+using CorpBite.Data;
 using CorpBite.Models;
 using CorpBite.ViewModels.RestaurantViewModels;
 using Microsoft.AspNetCore.Authorization;
@@ -6,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace CorpBite.Controllers
@@ -32,7 +34,12 @@ namespace CorpBite.Controllers
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            ViewBag.Locations = new SelectList(await _context.Locations.ToListAsync(), "Id", "BuildingName");
+            var locations = await _context.Locations.ToListAsync();
+            ViewBag.Locations = locations.Select(l => new SelectListItem
+            {
+                Value = l.Id.ToString(),
+                Text = $"{l.BuildingName} - Floor {l.FloorNumber}" 
+            }).ToList();
             return View();
         }
 
@@ -42,15 +49,23 @@ namespace CorpBite.Controllers
         {
             if (ModelState.IsValid)
             {
-                var restaurant = new Restaurant
+                // Get the ID of the currently logged-in user
+                var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+                if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int adminUserId))
                 {
-                    Name = model.Name,
-                    Description = model.Description,
-                    LocationId = model.LocationId
-                };
-                _context.Restaurants.Add(restaurant);
-                await _context.SaveChangesAsync();
-                return RedirectToAction("Index");
+                    var restaurant = new Restaurant
+                    {
+                        Name = model.Name,
+                        Description = model.Description,
+                        LocationId = model.LocationId,
+                        AdminUserId = adminUserId // Set the AdminUserId
+                    };
+                    _context.Restaurants.Add(restaurant);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction("Index");
+                }
+                // If we can't get the user ID, add an error to the model state
+                ModelState.AddModelError(string.Empty, "Could not retrieve the current user's ID.");
             }
             ViewBag.Locations = new SelectList(await _context.Locations.ToListAsync(), "Id", "BuildingName", model.LocationId);
             return View(model);
@@ -288,5 +303,37 @@ namespace CorpBite.Controllers
 
             return RedirectToAction("Menu", new { restaurantId = restaurantId });
         }
+
+
+        [HttpGet]
+        public async Task<IActionResult> DeleteMenuItemWarning(int id)
+        {
+            var menuItem = await _context.MenuItems.FindAsync(id);
+            if (menuItem == null)
+            {
+                return NotFound();
+            }
+
+            var restaurant = await _context.Restaurants.FindAsync(menuItem.RestaurantId);
+            if (restaurant == null)
+            {
+                return NotFound();
+            }
+
+            var model = new MenuItemViewModel
+            {
+                Id = menuItem.Id,
+                Name = menuItem.Name,
+                Description = menuItem.Description,
+                Price = menuItem.Price,
+                Category = menuItem.Category,
+                IsActive = menuItem.IsActive,
+                RestaurantId = menuItem.RestaurantId,
+                RestaurantName = restaurant.Name
+            };
+
+            return View(model);
+        }
+
     }
 }

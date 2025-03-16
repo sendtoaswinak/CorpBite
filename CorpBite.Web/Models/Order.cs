@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CorpBite.Models
 {
@@ -14,14 +15,20 @@ namespace CorpBite.Models
 
         public DateTime OrderDate { get; set; } = DateTime.UtcNow;
 
-        public string OrderStatus { get; set; } // e.g., Pending, Processing, Delivered, Cancelled
+        public string OrderStatus { get; set; } // e.g., Pending, Preparing, Ready to pick, Completed, Cancelled, Scheduled
 
         [Required]
+        [Column(TypeName = "decimal(18,0)")]
         public decimal TotalAmount { get; set; }
 
         public string PaymentMethod { get; set; }
 
         public DateTime? ScheduledTime { get; set; }
+
+        // New Properties for Order Preparation
+        public DateTime? PreparationStartTime { get; set; }
+        public DateTime? PreparationEndTime { get; set; }
+        public TimeSpan? PreparationTimeExtension { get; set; }
 
         public ICollection<OrderItem> OrderItems { get; set; }
         public DateTime CreatedOn { get; set; } = DateTime.UtcNow;

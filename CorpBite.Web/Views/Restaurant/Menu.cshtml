@@ -1,0 +1,74 @@
+﻿@model IEnumerable<CorpBite.ViewModels.RestaurantViewModels.MenuItemViewModel>
+
+@{
+    ViewData["Title"] = "Menu for " + ViewBag.RestaurantName;
+}
+
+<div class="container mt-5">
+    <h2>@ViewData["Title"]</h2>
+    <hr />
+    <p>
+        <a asp-action="CreateMenuItem" asp-route-restaurantId="@ViewBag.RestaurantId" class="btn btn-success">Create New Menu Item</a>
+        <a asp-action="Index" class="btn btn-secondary">Back to Restaurants</a>
+    </p>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    @Html.DisplayNameFor(model => model.Name)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Description)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Price)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.Category)
+                </th>
+                <th>
+                    @Html.DisplayNameFor(model => model.IsActive)
+                </th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Description)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Price)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Category)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.IsActive)
+                    </td>
+                    <td>
+                        <a asp-action="EditMenuItem" asp-route-id="@item.Id" class="btn btn-primary btn-sm">Edit</a>
+                        @if (item.IsActive)
+                        {
+                            <form asp-action="DisableMenuItem" asp-route-id="@item.Id" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-warning btn-sm">Disable</button>
+                            </form>
+                        }
+                        else
+                        {
+                            <form asp-action="EnableMenuItem" asp-route-id="@item.Id" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-success btn-sm">Enable</button>
+                            </form>
+                        }
+                        <a asp-action="DeleteMenuItemWarning" asp-route-id="@item.Id" class="btn btn-danger btn-sm">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

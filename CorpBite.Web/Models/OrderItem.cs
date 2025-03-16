@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace CorpBite.Models
 {
@@ -19,6 +20,8 @@ namespace CorpBite.Models
         public int Quantity { get; set; }
 
         [Required]
+
+        [Column(TypeName = "decimal(18,0)")]
         public decimal Price { get; set; } // Price at the time of ordering
 
         public DateTime CreatedOn { get; set; } = DateTime.UtcNow;

@@ -1,0 +1,173 @@
+﻿@model CorpBite.ViewModels.AdminViewModels.AdminDashboardViewModel
+
+@{
+    ViewData["Title"] = "Admin Dashboard";
+}
+
+<div class="container mt-5">
+    <h2>@ViewData["Title"]</h2>
+    <hr />
+
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="bg-light p-3 rounded shadow-sm">
+                <h3><i class="fa-solid fa-list-check me-2"></i> Active Orders</h3>
+                @if (Model.ActiveOrders != null && Model.ActiveOrders.Any())
+                {
+                    <p>There are currently <strong>@Model.ActiveOrders.Count()</strong> active orders.</p>
+                    <a asp-controller="Admin" asp-action="ActiveOrders" class="btn btn-primary btn-sm"><i class="fa-solid fa-eye me-2"></i> View All Active Orders</a>
+                }
+                else
+                {
+                    <p>No active orders at the moment.</p>
+                }
+            </div>
+        </div>
+    </div>
+
+    <hr class="my-4" />
+
+    <div class="mb-4">
+        <h3>All Restaurants</h3>
+        <button id="viewRestaurantsBtn" class="btn btn-outline-info btn-sm mb-2"><i class="fa-solid fa-eye me-2"></i> View All Restaurants</button>
+        <div id="restaurantListDiv" class="restaurant-list scrollable-div" style="display: none;">
+            <h3>Filter Restaurants</h3>
+            <form asp-action="Dashboard" method="get" class="mb-3">
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="building" class="form-label">Filter by Building:</label>
+                            <input type="text" class="form-control" id="building" name="building" placeholder="Enter building name" value="@Model.BuildingFilter">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="mb-3">
+                            <label for="floor" class="form-label">Filter by Floor:</label>
+                            <input type="text" class="form-control" id="floor" name="floor" placeholder="Enter floor number" value="@Model.FloorFilter">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <button type="submit" class="btn btn-primary mt-4"><i class="fa-solid fa-filter me-2"></i> Filter</button>
+                        <a asp-action="Dashboard" class="btn btn-secondary mt-4 ms-2"><i class="fa-solid fa-broom me-2"></i> Clear Filters</a>
+                    </div>
+                </div>
+            </form>
+
+            @if (Model.Restaurants != null && Model.Restaurants.Any())
+            {
+                <div class="row row-cols-1 row-cols-md-3 g-4">
+                    @foreach (var restaurant in Model.Restaurants)
+                    {
+                        <div class="col">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="fa-solid fa-store me-2"></i> @restaurant.Name</h5>
+                                    <p class="card-text">@restaurant.Description</p>
+                                    <p class="card-text"><small class="text-muted"><i class="fa-solid fa-building me-1"></i> Building: @restaurant.Location?.BuildingName, Floor: @restaurant.Location?.FloorNumber</small></p>
+                                    <a asp-controller="Restaurant" asp-action="Edit" asp-route-id="@restaurant.Id" class="btn btn-sm btn-primary"><i class="fa-solid fa-pen-to-square me-2"></i> Edit</a>
+                                    <a asp-controller="Restaurant" asp-action="Menu" asp-route-restaurantId="@restaurant.Id" class="btn btn-sm btn-info"><i class="fa-solid fa-utensils me-2"></i> Menu</a>
+                                    <a asp-controller="Restaurant" asp-action="Delete" asp-route-id="@restaurant.Id" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash-alt me-2"></i> Delete</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p>No restaurants found.</p>
+            }
+        </div>
+    </div>
+
+    <hr class="my-4" />
+
+    <div class="mb-4">
+        <h3>All Menu Items</h3>
+        <button id="viewMenuItemsBtn" class="btn btn-outline-info btn-sm mb-2"><i class="fa-solid fa-eye me-2"></i> View All Menu Items</button>
+        <div id="menuItemListDiv" class="menu-item-list scrollable-div" style="display: none;">
+            <h3>Filter Menu Items</h3>
+            <form asp-action="Dashboard" method="get" class="mb-3">
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="menuItemName" class="form-label">Filter by Name:</label>
+                            <input type="text" class="form-control" id="menuItemName" name="menuItemName" placeholder="Enter menu item name" value="@Model.MenuItemNameFilter">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="menuItemCategory" class="form-label">Filter by Category:</label>
+                            <input type="text" class="form-control" id="menuItemCategory" name="menuItemCategory" placeholder="Enter category" value="@Model.MenuItemCategoryFilter">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="mb-3">
+                            <label for="menuItemRestaurant" class="form-label">Filter by Restaurant:</label>
+                            <select class="form-select" id="menuItemRestaurant" name="menuItemRestaurant">
+                                <option value="">-- All Restaurants --</option>
+                                @foreach (var restaurant in Model.AllRestaurants)
+                                {
+                                    <option value="@restaurant.Id" selected="@(Model.MenuItemRestaurantFilter == restaurant.Id)">@restaurant.Name</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <button type="submit" class="btn btn-primary mt-4"><i class="fa-solid fa-filter me-2"></i> Filter</button>
+                        <a asp-action="Dashboard" class="btn btn-secondary mt-4 ms-2"><i class="fa-solid fa-broom me-2"></i> Clear Filters</a>
+                    </div>
+                </div>
+            </form>
+
+            @if (Model.MenuItems != null && Model.MenuItems.Any())
+            {
+                <div class="row row-cols-1 row-cols-md-3 g-4">
+                    @foreach (var item in Model.MenuItems)
+                    {
+                        <div class="col">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title"><i class="fa-solid fa-burger me-2"></i> @item.Name</h5>
+                                    <p class="card-text">@item.Description</p>
+                                    <p class="card-text"><small class="text-muted"><i class="fa-solid fa-tag me-1"></i> Category: @item.Category</small></p>
+                                    <p class="card-text"><small class="text-muted"><i class="fa-solid fa-store me-1"></i> Restaurant: @item.Restaurant?.Name</small></p>
+                                    <p class="card-text"><strong>Price: @item.Price</strong></p>
+                                    <a asp-controller="Restaurant" asp-action="EditMenuItem" asp-route-id="@item.Id" class="btn btn-sm btn-primary"><i class="fa-solid fa-pen-to-square me-2"></i> Edit</a>
+                                    <a asp-controller="Restaurant" asp-action="DeleteMenuItem" asp-route-id="@item.Id" class="btn btn-sm btn-danger"><i class="fa-solid fa-trash-alt me-2"></i> Delete</a>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <p>No menu items found.</p>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const viewRestaurantsBtn = document.getElementById('viewRestaurantsBtn');
+            const restaurantListDiv = document.getElementById('restaurantListDiv');
+            const viewMenuItemsBtn = document.getElementById('viewMenuItemsBtn');
+            const menuItemListDiv = document.getElementById('menuItemListDiv');
+
+            if (viewRestaurantsBtn && restaurantListDiv) {
+                viewRestaurantsBtn.addEventListener('click', function () {
+                    restaurantListDiv.style.display = restaurantListDiv.style.display === 'none' ? 'block' : 'none';
+                });
+            }
+
+            if (viewMenuItemsBtn && menuItemListDiv) {
+                viewMenuItemsBtn.addEventListener('click', function () {
+                    menuItemListDiv.style.display = menuItemListDiv.style.display === 'none' ? 'block' : 'none';
+                });
+            }
+        });
+    </script>
+}

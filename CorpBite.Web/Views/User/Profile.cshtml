@@ -1,4 +1,4 @@
-﻿@model ProfileViewModel
+﻿@model CorpBite.ViewModels.UserViewModels.ProfileViewModel
 
 @{
 	ViewData["Title"] = "Profile";
@@ -40,6 +40,9 @@
 		</dd>
 	</dl>
 	<div>
+		<form class="d-flex" asp-controller="Auth" asp-action="Logout" method="post">
+		<button type="submit" class="nav-link btn btn-link text-dark"><i class="fa-solid fa-sign-out-alt me-2"></i> Logout</button>
+		</form>
 		<a asp-action="EditProfile" class="btn btn-primary">Edit Profile</a> |
 		<a asp-action="ChangePassword" class="btn btn-warning">Change Password</a>
 	</div>

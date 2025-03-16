@@ -170,22 +170,28 @@ namespace CorpBite.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ScheduleOrder(DateTime scheduledTime)
+        public async Task<IActionResult> ScheduleOrder(DateTime? scheduledTime)
         {
             var cart = GetCartFromSession();
             if (!cart.Any())
             {
-                ModelState.AddModelError("", "Your cart is empty.");
+                ModelState.AddModelError("", "Your plate is empty.");
                 return View();
             }
 
-            if (scheduledTime <= DateTime.Now)
+            if (!scheduledTime.HasValue)
             {
-                ModelState.AddModelError("ScheduledTime", "Scheduled time must be in the future.");
+                ModelState.AddModelError("scheduledTime", "Please select a schedule time.");
                 return View();
             }
 
-            return await ProcessOrder(cart, scheduledTime);
+            if (scheduledTime.Value <= DateTime.Now)
+            {
+                ModelState.AddModelError("scheduledTime", "Scheduled time must be in the future.");
+                return View();
+            }
+
+            return await ProcessOrder(cart, scheduledTime.Value);
         }
 
         [HttpPost]
@@ -194,7 +200,7 @@ namespace CorpBite.Controllers
             var cart = GetCartFromSession();
             if (!cart.Any())
             {
-                ModelState.AddModelError("", "Your cart is empty.");
+                ModelState.AddModelError("", "Your plate is empty.");
                 return RedirectToAction("Cart");
             }
 
@@ -269,10 +275,11 @@ namespace CorpBite.Controllers
         [HttpGet]
         public async Task<IActionResult> Receipt(int orderId)
         {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
             var order = await _context.Orders
                 .Include(o => o.OrderItems)
                     .ThenInclude(oi => oi.MenuItem)
-                .FirstOrDefaultAsync(o => o.Id == orderId && o.UserId == int.Parse(User.FindFirstValue(System.Security.Claims.ClaimTypes.NameIdentifier)));
+                .FirstOrDefaultAsync(o => o.Id == orderId && o.UserId == userId);
 
             if (order == null)
             {
@@ -296,6 +303,30 @@ namespace CorpBite.Controllers
             };
 
             return View(orderViewModel);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ActiveOrders()
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var orders = await _context.Orders
+                .Where(o => o.UserId == userId && o.OrderStatus != "Completed")
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.MenuItem)
+                .ToListAsync();
+            return View(orders);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> OrderHistory()
+        {
+            var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
+            var orders = await _context.Orders
+                .Where(o => o.UserId == userId)
+                .Include(o => o.OrderItems)
+                    .ThenInclude(oi => oi.MenuItem)
+                .ToListAsync();
+            return View(orders);
         }
     }
 }

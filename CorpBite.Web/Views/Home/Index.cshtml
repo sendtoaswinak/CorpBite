@@ -1,58 +1,57 @@
-﻿@{
-	ViewData["Title"] = "Home Page";
+﻿@model dynamic
+@{
+    ViewData["Title"] = "Home Page";
 }
 
-<div class="container mt-5">
-	<div class="jumbotron bg-light p-5 rounded-lg">
-		<h1 class="display-4">Welcome to CorpBite!</h1>
-		<p class="lead">Your go-to platform for corporate food ordering.</p>
-		<hr class="my-4">
-		<p>Browse delicious meals from your favorite food courts within your office building.</p>
-		@if (!User.Identity.IsAuthenticated)
-		{
-			<p class="lead">
-				<a class="btn btn-primary btn-lg" asp-controller="Auth" asp-action="Register" role="button">Register Now</a> or
-				<a class="btn btn-success btn-lg" asp-controller="Auth" asp-action="Login" role="button">Log In</a>
-			</p>
-		}
-		else
-		{
-			<p class="lead">
-				<a class="btn btn-primary btn-lg" asp-controller="Order" asp-action="Create" role="button">Start Ordering</a>
-			</p>
-		}
-	</div>
-
-	@if (User.Identity.IsAuthenticated)
-	{
-		<div class="row mt-4">
-			<div class="col-md-4">
-				<div class="card">
-					<div class="card-body">
-						<h5 class="card-title">Browse Food Courts</h5>
-						<p class="card-text">View available food options based on your location.</p>
-						<a asp-controller="Order" asp-action="Create" class="btn btn-outline-primary">Browse Now</a>
-					</div>
-				</div>
-			</div>
-			<div class="col-md-4">
-				<div class="card">
-					<div class="card-body">
-						<h5 class="card-title">My Cart</h5>
-						<p class="card-text">Review and manage the items in your shopping cart.</p>
-						<a asp-controller="Order" asp-action="Cart" class="btn btn-outline-success">View Cart</a>
-					</div>
-				</div>
-			</div>
-			<div class="col-md-4">
-				<div class="card">
-					<div class="card-body">
-						<h5 class="card-title">Submit Feedback</h5>
-						<p class="card-text">Share your experience and help us improve.</p>
-						<a asp-controller="Feedback" asp-action="Submit" class="btn btn-outline-warning">Give Feedback</a>
-					</div>
-				</div>
-			</div>
-		</div>
-	}
+<div class="jumbotron bg-light p-5 rounded-lg">
+    <h1 class="display-4">Welcome to CorpBite!</h1>
+    <p class="lead">Your go-to platform for corporate food ordering.</p>
+    <hr class="my-4">
+    <p>Browse delicious meals from your favorite food courts within your office building.</p>
+    @if (!User.Identity.IsAuthenticated)
+    {
+        <p class="lead">
+            <a class="btn btn-primary btn-lg" asp-controller="Auth" asp-action="Register" role="button"><i class="fa-solid fa-user-plus me-2"></i> Register Now</a> or
+            <a class="btn btn-success btn-lg" asp-controller="Auth" asp-action="Login" role="button"><i class="fa-solid fa-right-to-bracket me-2"></i> Log In</a>
+        </p>
+    }
+    else
+    {
+        <p class="lead">
+            <a class="btn btn-primary btn-lg" asp-controller="Order" asp-action="Create" role="button"><i class="fa-solid fa-utensils me-2"></i> Start Ordering</a>
+        </p>
+    }
 </div>
+
+@if (User.Identity.IsAuthenticated)
+{
+    <div class="row mt-4 card-container">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fa-solid fa-shop me-2"></i> Browse Food Courts</h5>
+                    <p class="card-text">View available food options based on your location.</p>
+                    <a asp-controller="Order" asp-action="Create" class="btn btn-outline-primary"><i class="fa-solid fa-eye me-2"></i> Browse Now</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fa-solid fa-plate-wheat me-2"></i> Your Plate</h5>
+                    <p class="card-text">Review and manage the items in your Plate.</p>
+                    <a asp-controller="Order" asp-action="Cart" class="btn btn-outline-success"><i class="fa-solid fa-basket-shopping me-2"></i> View Plate</a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title"><i class="fa-solid fa-message me-2"></i> Submit Feedback</h5>
+                    <p class="card-text">Share your experience and help us improve.</p>
+                    <a asp-controller="Feedback" asp-action="Submit" class="btn btn-outline-warning"><i class="fa-solid fa-pen-to-square me-2"></i> Give Feedback</a>
+                </div>
+            </div>
+        </div>
+    </div>
+}

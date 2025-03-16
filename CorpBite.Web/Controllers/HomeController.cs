@@ -15,6 +15,10 @@ namespace CorpBite.Controllers
 
         public IActionResult Index()
         {
+            if (User.Identity.IsAuthenticated && User.IsInRole("Admin"))
+            {
+                return RedirectToAction("Dashboard", "Admin");
+            }
             return View();
         }
 

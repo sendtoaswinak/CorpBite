@@ -1,0 +1,113 @@
+﻿@model IEnumerable<CorpBite.Models.Order>
+
+@{
+    ViewData["Title"] = "Active Orders";
+}
+
+<div class="container mt-5">
+    <h2>@ViewData["Title"]</h2>
+    <hr />
+
+    <form asp-action="ActiveOrders" method="get" class="mb-3">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="mb-3">
+                    <label for="restaurantId" class="form-label">Filter by Restaurant:</label>
+                    <select class="form-select" id="restaurantId" name="restaurantId">
+                        <option value="">-- All Restaurants --</option>
+                        @foreach (var restaurant in ViewBag.Restaurants as SelectList)
+                        {
+                            <option value="@restaurant.Value" selected="@(ViewBag.RestaurantId != null && ViewBag.RestaurantId.ToString() == restaurant.Value)">@restaurant.Text</option>
+                        }
+                    </select>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <button type="submit" class="btn btn-primary mt-4">Filter</button>
+                <a asp-action="ActiveOrders" class="btn btn-secondary mt-4 ms-2">Clear Filter</a>
+            </div>
+        </div>
+    </form>
+
+    @if (Model.Any())
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>User</th>
+                    <th>Order Date</th>
+                    <th>Status</th>
+                    <th>Total Amount</th>
+                    <th>Scheduled Time</th>
+                    <th>Preparation Timer</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in Model)
+                {
+                    <tr>
+                        <td>@order.Id</td>
+                        <td>@order.User?.Email</td>
+                        <td>@order.OrderDate.ToString("g")</td>
+                        <td>@order.OrderStatus</td>
+                        <td>@order.TotalAmount</td>
+                        <td>@order.ScheduledTime?.ToString("g")</td>
+                        <td>
+                            @if (order.PreparationStartTime.HasValue)
+                            {
+                                var endTime = order.PreparationEndTime ?? (order.ScheduledTime.HasValue ? order.ScheduledTime : DateTime.Now.AddMinutes(30));
+                                var timeLeft = endTime - DateTime.Now;
+                                if (timeLeft.HasValue && timeLeft.Value.TotalMilliseconds > 0)
+                                {
+                                    <span>@timeLeft.Value.ToString(@"hh\:mm\:ss")</span>
+                                }
+                                else if (timeLeft.HasValue)
+                                {
+                                    <span class="text-danger">Time Up</span>
+                                }
+                                else
+                                {
+                                    <span>N/A</span>
+                                }
+                            }
+                            else if (order.OrderStatus == "Preparing")
+                            {
+                                <span>Preparing...</span>
+                            }
+                            else
+                            {
+                                <span>Not Started</span>
+                            }
+                        </td>
+                        <td>
+                            <form method="post" asp-action="UpdateOrderStatus" asp-route-orderId="@order.Id">
+                                <select class="form-select form-select-sm" name="orderStatus">
+                                    <option value="Preparing" selected="@(order.OrderStatus == "Preparing")">Preparing</option>
+                                    <option value="Ready to pick" selected="@(order.OrderStatus == "Ready to pick")">Ready to pick</option>
+                                    <option value="Completed" selected="@(order.OrderStatus == "Completed")">Completed</option>
+                                    <option value="Cancelled" selected="@(order.OrderStatus == "Cancelled")">Cancelled</option>
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-primary mt-1">Update</button>
+                            </form>
+                            @if (order.ScheduledTime.HasValue && order.OrderStatus != "Completed" && order.OrderStatus != "Cancelled")
+                            {
+                                <form method="post" asp-action="IncreasePreparationTimer" asp-route-orderId="@order.Id">
+                                    <div class="input-group mt-1">
+                                        <input type="number" class="form-control form-control-sm" name="additionalMinutes" placeholder="Add mins" value="10">
+                                        <button type="submit" class="btn btn-sm btn-outline-secondary">Add Time</button>
+                                    </div>
+                                </form>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No active orders found.</p>
+    }
+</div>

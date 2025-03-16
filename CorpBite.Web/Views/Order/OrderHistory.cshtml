@@ -1,0 +1,47 @@
+﻿@model IEnumerable<CorpBite.Models.Order>
+
+@{
+    ViewData["Title"] = "Order History";
+}
+
+<div class="container mt-5">
+    <h2>@ViewData["Title"]</h2>
+    <hr />
+
+    @if (Model.Any())
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Order ID</th>
+                    <th>Order Date</th>
+                    <th>Status</th>
+                    <th>Total Amount</th>
+                    <th>Payment Method</th>
+                    <th>Scheduled Time</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in Model)
+                {
+                    <tr>
+                        <td>@order.Id</td>
+                        <td>@order.OrderDate.ToString("g")</td>
+                        <td>@order.OrderStatus</td>
+                        <td>@order.TotalAmount</td>
+                        <td>@order.PaymentMethod</td>
+                        <td>@order.ScheduledTime?.ToString("g")</td>
+                        <td>
+                            <a asp-action="Receipt" asp-route-orderId="@order.Id" class="btn btn-sm btn-info">View Receipt</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>No order history found.</p>
+    }
+</div>

@@ -1,7 +1,7 @@
-﻿@model MenuItemViewModel
+﻿@model CorpBite.ViewModels.RestaurantViewModels.MenuItemViewModel
 
 @{
-	ViewData["Title"] = "Edit Menu Item";
+	ViewData["Title"] = "Create Menu Item";
 }
 
 <div class="container mt-5">
@@ -9,9 +9,8 @@
 	<hr />
 	<div class="row">
 		<div class="col-md-4">
-			<form asp-action="EditMenuItem" asp-route-id="@Model.Id" method="post">
+			<form asp-action="CreateMenuItem" asp-route-restaurantId="@ViewBag.RestaurantId" method="post">
 				<div asp-validation-summary="ModelOnly" class="text-danger"></div>
-				<input type="hidden" asp-for="RestaurantId" />
 				<div class="mb-3">
 					<label asp-for="Name" class="form-label"></label>
 					<input asp-for="Name" class="form-control" />
@@ -36,8 +35,8 @@
 					<input asp-for="IsActive" class="form-check-input" />
 					<label asp-for="IsActive" class="form-check-label">Is Active</label>
 				</div>
-				<button type="submit" class="btn btn-primary">Save</button> |
-				<a asp-action="Menu" asp-route-restaurantId="@Model.RestaurantId" class="btn btn-secondary">Back to Menu</a>
+				<button type="submit" class="btn btn-success">Create</button> |
+				<a asp-action="Menu" asp-route-restaurantId="@ViewBag.RestaurantId" class="btn btn-secondary">Back to Menu</a>
 			</form>
 		</div>
 	</div>

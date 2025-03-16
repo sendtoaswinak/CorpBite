@@ -1,129 +1,476 @@
+/* --- New Theme: Soft & Earthy --- */
+
+/* Color Palette: #FAF1E6 (Cream), #FDF9F6 (Light Cream), #E4EFE7 (Mint Cream), #99BC85 (Sage Green) */
 :root {
-    --primary-color: #0d6efd;
-    --secondary-color: #6c757d;
-    --success-color: #198754;
-    --warning-color: #ffc107;
+    --cream-bg: #FAF1E6;
+    --light-cream: #FDF9F6;
+    --mint-cream: #E4EFE7;
+    --sage-green: #99BC85;
+    --sage-green-hover: #7e9a69;
+    --dark-text: #333;
+    --secondary-text: #444;
+    --light-border: #e0e0e0;
+    --input-border: #ced4da;
+    --input-focus-shadow: rgba(153, 188, 133, 0.25);
+    --table-header-bg: #f8f8f8;
+    --table-header-border: #d0d0d0;
+    --table-odd-row-bg: var(--light-cream);
+    --navbar-bg-opacity: rgba(255, 255, 255, 0.8);
+    --footer-bg: #f8f8f8;
+    --card-shadow: rgba(0, 0, 0, 0.05);
+    --card-bg: #fff;
+    --scroll-thumb-bg: var(--sage-green);
+    --scroll-track-bg: #f1f1f1;
+    --success-color: #6c757d;
+    --success-hover-color: #5a6268;
     --danger-color: #dc3545;
 }
 
-html {
-    position: relative;
-    min-height: 100%;
-}
-
+/* General Body Styles */
 body {
-    margin-bottom: 60px;
-    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.7;
+    color: var(--dark-text);
+    background-color: var(--cream-bg);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
 }
 
-.footer {
-    position: absolute;
-    bottom: 0;
+html {
+    /* Removed overflow-y: scroll from html */
+}
+
+/* Home Page Background */
+.home-background {
+    background-image: url('/images/food-court-background.jpg'); /* Replace with your image path */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    white-space: nowrap;
-    line-height: 60px;
+    height: 100%;
+    z-index: -1;
 }
 
-/* Card hover effects */
-.card {
-    transition: transform 0.2s, box-shadow 0.2s;
-}
-
-    .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    .home-background::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(250, 241, 230, 0.6); /* Less transparent overlay */
+        z-index: -1;
     }
 
-/* Food court and menu item cards */
-.food-court-card {
-    border-radius: 10px;
-    overflow: hidden;
+/* Container */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px; /* Added horizontal padding back */
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
 }
 
-    .food-court-card img {
-        height: 200px;
-        object-fit: cover;
+.main-content {
+    padding-top: 60px; /* Adjusted to account for navbar */
+    padding-bottom: 60px; /* Keep for footer */
+    position:relative;
+    border-radius: 8px;
+    padding: 30px;
+    margin-top: 0; /* Remove top margin that might push it down */
+    
+    flex-grow: 1;
+    width: 100%;
+}
+
+/* Typography */
+h1, h2, h3, h4, h5, h6 {
+    color: var(--dark-text);
+    font-weight: bold;
+    margin-bottom: 1.2rem;
+}
+
+h1 {
+    font-size: 2.8rem;
+}
+
+h2 {
+    font-size: 2.2rem;
+}
+
+/* Links */
+a {
+    color: var(--sage-green);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+    a:hover {
+        color: var(--sage-green-hover);
+        text-decoration: underline;
     }
 
-.menu-item-card {
-    border: none;
-    border-radius: 10px;
+/* Buttons */
+.btn {
+    display: inline-block;
+    padding: 12px 25px;
+    font-size: 1rem;
+    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    border: 2px solid transparent;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.btn-primary {
+    background-color: var(--sage-green);
+    color: white;
+}
+
+    .btn-primary:hover {
+        background-color: var(--sage-green-hover);
+    }
+
+.btn-success {
+    background-color: var(--success-color);
+    color: white;
+}
+
+    .btn-success:hover {
+        background-color: var(--success-hover-color);
+    }
+
+.btn-outline-success {
+    background-color: transparent;
+    color: var(--success-color);
+    border-color: var(--success-color);
+}
+
+    .btn-outline-success:hover {
+        background-color: var(--success-color);
+        color: white;
+    }
+
+.btn-link {
+    color: var(--dark-text);
+    text-decoration: none;
+}
+
+    .btn-link:hover {
+        text-decoration: underline;
+        color: var(--sage-green);
+    }
+
+.btn-lg {
+    padding: 15px 30px;
+    font-size: 1.2rem;
+}
+
+/* Forms */
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    color: var(--secondary-text);
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--input-border);
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 1rem;
+}
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--sage-green);
+        box-shadow: 0 0 0 0.2rem var(--input-focus-shadow);
+    }
+
+.form-select {
+    width: 100%;
+    padding: 0.75rem;
+    margin-bottom: 1rem;
+    border: 1px solid var(--input-border);
+    border-radius: 5px;
+    box-sizing: border-box;
+    font-size: 1rem;
     background-color: white;
 }
 
-    .menu-item-card img {
-        height: 120px;
-        object-fit: cover;
-        border-radius: 10px 10px 0 0;
+    .form-select:focus {
+        outline: none;
+        border-color: var(--sage-green);
+        box-shadow: 0 0 0 0.2rem var(--input-focus-shadow);
     }
 
-/* Rating stars */
-.rating {
-    color: var(--warning-color);
+/* Tables */
+.table {
+    width: 100%;
+    margin-bottom: 1rem;
+    color: var(--dark-text);
+    border-collapse: collapse;
+    border: 1px solid var(--light-border);
 }
 
-.rating-input {
-    display: none;
-}
-
-.rating-label {
-    cursor: pointer;
-    font-size: 1.5rem;
-    color: #ddd;
-}
-
-    .rating-label.active {
-        color: var(--warning-color);
+    .table th,
+    .table td {
+        padding: 0.75rem;
+        vertical-align: top;
+        border-top: 1px solid var(--light-border);
+        text-align: left;
     }
 
-/* Order status badges */
-.status-pending {
-    background-color: var(--warning-color);
+    .table thead th {
+        vertical-align: bottom;
+        border-bottom: 2px solid var(--table-header-border);
+        background-color: var(--table-header-bg);
+        font-weight: bold;
+    }
+
+    .table tbody tr:nth-of-type(odd) {
+        background-color: var(--table-odd-row-bg);
+    }
+
+/* Navigation Bar */
+.navbar {
+    padding: 1rem 20px; /* Added horizontal padding to match container */
+    backdrop-filter: blur(10px);
+    background-color: var(--navbar-bg-opacity) !important;
+    width: 100%;
+    position: fixed; /* Make navbar fixed at the top */
+    top: 0;
+    left: 0;
+    z-index: 1000; /* Ensure it's above other content */
 }
 
-.status-confirmed {
-    background-color: var(--primary-color);
+.navbar-brand {
+    font-size: 1.75rem;
+    font-weight: bold;
 }
 
-.status-completed {
-    background-color: var(--success-color);
+.navbar-nav .nav-link {
+    padding: 0.5rem 1rem;
+    transition: color 0.3s ease;
 }
 
-.status-cancelled {
-    background-color: var(--danger-color);
+    .navbar-nav .nav-link:hover {
+        color: var(--sage-green) !important;
+    }
+
+/* Jumbotron on Home Page */
+.jumbotron {
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    backdrop-filter: blur(10px);
 }
 
-/* Loading spinner */
-.loading-spinner {
-    display: none;
+    .jumbotron h1 {
+        color: var(--dark-text);
+    }
+
+    .jumbotron .btn-primary {
+        background-color: var(--sage-green);
+    }
+
+        .jumbotron .btn-primary:hover {
+            background-color: var(--sage-green-hover);
+        }
+
+/* Scrollable Div for Dashboard Lists */
+.scrollable-div {
+    max-height: 400px;
+    overflow-y: auto;
+    padding: 15px;
+    border: 1px solid var(--light-border);
+    border-radius: 8px;
+    background-color: #f9f9f9;
+    margin-top: 10px;
+}
+
+    .scrollable-div::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .scrollable-div::-webkit-scrollbar-thumb {
+        background-color: var(--scroll-thumb-bg);
+        border-radius: 4px;
+    }
+
+    .scrollable-div::-webkit-scrollbar-track {
+        background-color: var(--scroll-track-bg);
+        border-radius: 4px;
+    }
+
+/* Responsive Card Layout for Restaurants */
+.restaurant-list .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.restaurant-list .col {
+    flex: 1 0 calc(33.33% - 1.5rem);
+    min-width: 300px;
+}
+
+@media (max-width: 992px) {
+    .restaurant-list .col {
+        flex: 1 0 calc(50% - 1.5rem);
+    }
+}
+
+@media (max-width: 768px) {
+    .restaurant-list .col {
+        flex: 1 0 100%;
+    }
+}
+
+/* Responsive Card Layout for Menu Items */
+.menu-item-list .row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+}
+
+.menu-item-list .col {
+    flex: 1 0 calc(25% - 1.5rem); /* Default to four, adjust for full screen below */
+    min-width: 250px;
+}
+
+@media (min-width: 1200px) { /* For full screens and wider */
+    .menu-item-list .col {
+        flex: 1 0 calc(33.33% - 1.5rem); /* Force three cards per row */
+    }
+}
+
+@media (max-width: 1200px) and (min-width: 993px) { /* For slightly smaller desktops */
+    .menu-item-list .col {
+        flex: 1 0 calc(33.33% - 1.5rem); /* Three cards per row */
+    }
+}
+
+@media (max-width: 992px) {
+    .menu-item-list .col {
+        flex: 1 0 calc(50% - 1.5rem);
+    }
+}
+
+@media (max-width: 768px) {
+    .menu-item-list .col {
+        flex: 1 0 100%;
+    }
+}
+
+/* Footer */
+.footer {
+    background-color: var(--footer-bg);
+    padding: 0px 0px; /* Added horizontal padding to match container */
     text-align: center;
-    padding: 20px;
+    margin-top: auto;
+    width: 100%;
+    position: fixed; /* Make footer fixed at the bottom */
+    bottom: 0;
+    left: 0;
+    z-index: 1000; /* Ensure it's above other content */
 }
 
-    .loading-spinner.show {
-        display: block;
+/* Utility Classes */
+.mt-5 {
+    margin-top: 3rem !important;
+}
+
+.mb-3 {
+    margin-bottom: 1.5rem !important;
+}
+
+.mt-4 {
+    margin-top: 1.5rem !important;
+}
+
+.ms-2 {
+    margin-left: 1rem !important;
+}
+
+.text-danger {
+    color: var(--danger-color) !important;
+}
+
+/* Card Styling */
+.card-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    margin-top: 2rem;
+    width: 100%;
+}
+
+.card {
+    border: 1px solid var(--light-border);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px var(--card-shadow);
+    background-color: var(--card-bg);
+    flex: 1 0 calc(33.33% - 1.5rem);
+    min-width: 300px;
+}
+
+.card-body {
+    padding: 1.5rem;
+}
+
+.card-title {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    color: var(--dark-text);
+}
+
+.card-text {
+    color: #555;
+    margin-bottom: 1rem;
+}
+
+/* Responsive Design Media Queries */
+@media (max-width: 992px) {
+    .card {
+        flex: 1 0 calc(50% - 1.5rem);
+    }
+}
+
+@media (max-width: 768px) {
+    .card {
+        flex: 1 0 100%;
     }
 
-/* Responsive images */
-.responsive-img {
-    max-width: 100%;
-    height: auto;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-    width: 8px;
-}
-
-::-webkit-scrollbar-track {
-    background: #f1f1f1;
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--secondary-color);
-    border-radius: 4px;
-}
-
-    ::-webkit-scrollbar-thumb:hover {
-        background: var(--primary-color);
+    .main-content {
+        padding-top: 110px; /* Adjust padding for smaller navbar */
+        padding-bottom: 100px; /* Adjust padding for smaller footer */
     }
+}
+
+@media (max-width: 576px) {
+    h1 {
+        font-size: 2.2rem;
+    }
+
+    h2 {
+        font-size: 1.8rem;
+    }
+}

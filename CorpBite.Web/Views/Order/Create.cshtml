@@ -1,4 +1,4 @@
-﻿@model BrowseFoodCourtsViewModel
+﻿@model CorpBite.ViewModels.OrderViewModels.BrowseFoodCourtsViewModel
 
 @{
     ViewData["Title"] = "Browse Food Courts";
@@ -14,7 +14,7 @@
                 <option value="">-- Select a Location --</option>
                 @foreach (var location in Model.Locations)
                 {
-                    <option value="@location.Id" @(Model.SelectedLocationId == location.Id ? "selected" : "")>
+                    <option value="@location.Id" selected="@(Model.SelectedLocationId == location.Id)">
                         @location.BuildingName - Floor @location.FloorNumber
                     </option>
                 }
@@ -50,7 +50,7 @@
                                 <p class="card-text">@item.Description</p>
                                 <p class="card-text"><small class="text-muted">Price: @item.Price.ToString("C")</small></p>
                                 <form asp-action="AddToCart" asp-route-menuItemId="@item.Id" method="post">
-                                    <button type="submit" class="btn btn-outline-primary btn-sm">Add to Cart</button>
+                                    <button type="submit" class="btn btn-outline-primary btn-sm">Add to plate</button>
                                 </form>
                             </div>
                         </div>
