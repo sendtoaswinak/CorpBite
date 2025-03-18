@@ -1,5 +1,3 @@
-/* --- New Theme: Soft & Earthy --- */
-
 /* Color Palette: #FAF1E6 (Cream), #FDF9F6 (Light Cream), #E4EFE7 (Mint Cream), #99BC85 (Sage Green) */
 :root {
     --cream-bg: #FAF1E6;
@@ -15,8 +13,12 @@
     --table-header-bg: #f8f8f8;
     --table-header-border: #d0d0d0;
     --table-odd-row-bg: var(--light-cream);
+    --table-odd-row-bg: rgba(253, 249, 246, 0.6);
+    --table-row-hover-bg: rgba(228, 239, 231, 0.4);
     --navbar-bg-opacity: rgba(255, 255, 255, 0.8);
+    --navbar-height: 70px;
     --footer-bg: #f8f8f8;
+    --footer-height: 60px;
     --card-shadow: rgba(0, 0, 0, 0.05);
     --card-bg: #fff;
     --scroll-thumb-bg: var(--sage-green);
@@ -33,20 +35,24 @@ body {
     color: var(--dark-text);
     background-color: var(--cream-bg);
     margin: 0;
-    padding: 0;
-    min-height: 100vh;
+    padding-top: var(--navbar-height);
+    padding-bottom: var(--footer-height);
+    min-height: 100%;
     display: flex;
     flex-direction: column;
     overflow-x: hidden;
+/*    overflow-y:auto;*/
+    position: relative;
 }
 
 html {
-    /* Removed overflow-y: scroll from html */
+    height: 100%;
+    scroll-behavior: smooth;
+    overflow-y: auto; /* Allow scrolling on HTML level */
 }
-
 /* Home Page Background */
 .home-background {
-    background-image: url('/images/food-court-background.jpg'); /* Replace with your image path */
+    background-image: url('/images/vegetables-set-left-black-slate.jpg'); /* Replace with your image path */
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -73,22 +79,21 @@ html {
 .container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 0 20px; /* Added horizontal padding back */
+    padding: 20px; /* Added horizontal padding back */
     flex: 1;
-    overflow-y: auto;
     display: flex;
     flex-direction: column;
     width: 100%;
+/*    overflow-y: auto;*/
 }
 
 .main-content {
-    padding-top: 60px; /* Adjusted to account for navbar */
-    padding-bottom: 60px; /* Keep for footer */
+    /*padding-top: 60px;*/ /* Adjusted to account for navbar */
+    /*padding-bottom: 60px;*/ /* Keep for footer */
     position:relative;
     border-radius: 8px;
-    padding: 30px;
-    margin-top: 0; /* Remove top margin that might push it down */
-    
+    padding: 20px;
+    margin-top: 0;
     flex-grow: 1;
     width: 100%;
 }
@@ -224,7 +229,7 @@ a {
     width: 100%;
     margin-bottom: 1rem;
     color: var(--dark-text);
-    border-collapse: collapse;
+/*    border-collapse: collapse;*/
     border: 1px solid var(--light-border);
 }
 
@@ -243,8 +248,13 @@ a {
         font-weight: bold;
     }
 
-    .table tbody tr:nth-of-type(odd) {
-        background-color: var(--table-odd-row-bg);
+    .table tbody tr {
+        background-color: #E4EFE7;
+        backdrop-filter: blur(2px);
+        transition: background-color 0.3s ease;
+    }
+    .table tbody tr:hover {
+        background-color: var(--table-row-hover-bg);
     }
 
 /* Navigation Bar */
@@ -256,7 +266,9 @@ a {
     position: fixed; /* Make navbar fixed at the top */
     top: 0;
     left: 0;
-    z-index: 1000; /* Ensure it's above other content */
+    z-index: 1000;
+    height: var(--navbar-height)
+    /* Ensure it's above other content */
 }
 
 .navbar-brand {
@@ -296,13 +308,13 @@ a {
 
 /* Scrollable Div for Dashboard Lists */
 .scrollable-div {
-    max-height: 400px;
+    max-height: calc(100vh - var(--navbar-height) - var(--footer-height) - 40px); /* Adjust the 40px based on your needs */
     overflow-y: auto;
     padding: 15px;
     border: 1px solid var(--light-border);
     border-radius: 8px;
     background-color: #f9f9f9;
-    margin-top: 10px;
+    margin: 10px 0; /* Changed from margin-top only */
 }
 
     .scrollable-div::-webkit-scrollbar {
@@ -382,14 +394,16 @@ a {
 /* Footer */
 .footer {
     background-color: var(--footer-bg);
-    padding: 0px 0px; /* Added horizontal padding to match container */
-    text-align: center;
+    padding: 0px 0px;
     margin-top: auto;
+    text-align: center;
     width: 100%;
-    position: fixed; /* Make footer fixed at the bottom */
+    position: fixed !important; /* Force fixed position */
+    bottom: 0 !important; /* Force bottom positioning */
     bottom: 0;
     left: 0;
-    z-index: 1000; /* Ensure it's above other content */
+    z-index: 1000;
+    /*    height: var(--footer-height);*/
 }
 
 /* Utility Classes */
@@ -455,22 +469,33 @@ a {
 }
 
 @media (max-width: 768px) {
+    :root {
+        --navbar-height: 60px;
+        --footer-height: 50px;
+    }
     .card {
         flex: 1 0 100%;
     }
+    body {
+        padding-top: var(--navbar-height);
+        padding-bottom: var(--footer-height);
+    }
+
+    .container {
+        padding: 15px; /* Smaller padding on mobile */
+    }
 
     .main-content {
-        padding-top: 110px; /* Adjust padding for smaller navbar */
-        padding-bottom: 100px; /* Adjust padding for smaller footer */
+        padding: 15px;
     }
 }
 
 @media (max-width: 576px) {
-    h1 {
-        font-size: 2.2rem;
+    .container {
+        padding: 10px;
     }
 
-    h2 {
-        font-size: 1.8rem;
+    .main-content {
+        padding: 10px;
     }
 }

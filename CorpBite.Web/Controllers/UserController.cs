@@ -4,6 +4,7 @@ using CorpBite.ViewModels.AuthViewModels;
 using CorpBite.ViewModels.UserViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Security.Claims;
@@ -52,17 +53,30 @@ namespace CorpBite.Controllers
         public async Task<IActionResult> EditProfile()
         {
             var userId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            var user = await _context.Users.FindAsync(userId);
+            var user = await _context.Users
+                .Include(u => u.Location)
+                .FirstOrDefaultAsync(u => u.Id == userId);
 
             if (user == null)
             {
                 return NotFound();
             }
 
+            // Get all locations from the database
+            var locations = await _context.Locations
+                .Select(l => new SelectListItem
+                {
+                    Value = l.Id.ToString(),
+                    Text = $"{l.BuildingName} - {l.FloorNumber}"
+                })
+                .ToListAsync();
+
             var model = new EditProfileViewModel
             {
                 FirstName = user.FirstName,
-                LastName = user.LastName
+                LastName = user.LastName,
+                LocationId = user.Location?.Id ?? 0,
+                AvailableLocations = locations
             };
 
             return View(model);
@@ -84,13 +98,25 @@ namespace CorpBite.Controllers
 
                 user.FirstName = model.FirstName;
                 user.LastName = model.LastName;
-                user.UpdatedOn = DateTime.UtcNow;
+                user.LocationId = model.LocationId; // Update the location
+                user.UpdatedOn = DateTime.Now;
 
                 _context.Update(user);
                 await _context.SaveChangesAsync();
 
                 return RedirectToAction("Profile");
             }
+
+            // If we got this far, something failed, redisplay form
+            // Reload the locations list
+            model.AvailableLocations = await _context.Locations
+                .Select(l => new SelectListItem
+                {
+                    Value = l.Id.ToString(),
+                    Text = $"{l.BuildingName} - {l.FloorNumber}"
+                })
+                .ToListAsync();
+
             return View(model);
         }
 

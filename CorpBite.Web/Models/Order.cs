@@ -13,7 +13,7 @@ namespace CorpBite.Models
         public int UserId { get; set; }
         public User User { get; set; }
 
-        public DateTime OrderDate { get; set; } = DateTime.UtcNow;
+        public DateTime OrderDate { get; set; } = DateTime.Now;
 
         public string OrderStatus { get; set; } // e.g., Pending, Preparing, Ready to pick, Completed, Cancelled, Scheduled
 

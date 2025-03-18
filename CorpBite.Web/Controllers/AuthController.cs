@@ -51,6 +51,7 @@ namespace CorpBite.Controllers
                     FirstName = model.FirstName,
                     LastName = model.LastName,
                     Role = "Employee" // Set default role
+                    
                 };
 
                 _context.Users.Add(newUser);
