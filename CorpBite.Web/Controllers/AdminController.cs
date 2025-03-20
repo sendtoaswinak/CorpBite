@@ -3,9 +3,6 @@ using CorpBite.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using CorpBite.ViewModels.AdminViewModels;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -69,7 +66,7 @@ namespace CorpBite.Controllers
             // Fetch Active Orders
             var activeOrders = await _context.Orders
                 .Include(o => o.User)
-                .Where(o => o.OrderStatus == "Preparing" || o.OrderStatus == "Ready to pick" || o.OrderStatus == "Pending") // Adjust status as needed
+                .Where(o => o.OrderStatus == "Preparing" || o.OrderStatus == "Ready to pick" || o.OrderStatus == "Pending" || o.OrderStatus == "Scheduled") // Adjust status as needed
                 .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();
 

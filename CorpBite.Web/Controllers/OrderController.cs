@@ -219,7 +219,7 @@ namespace CorpBite.Controllers
             var order = new Order
             {
                 UserId = userId,
-                OrderDate = DateTime.UtcNow,
+                OrderDate = DateTime.Now,
                 OrderStatus = scheduledTime.HasValue ? "Scheduled" : "Pending",
                 TotalAmount = cart.Sum(item => item.Price * item.Quantity),
                 PaymentMethod = paymentMethod,

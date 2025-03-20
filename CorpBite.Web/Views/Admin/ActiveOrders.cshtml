@@ -57,7 +57,7 @@
                         <td>
                             @if (order.PreparationStartTime.HasValue)
                             {
-                                var endTime = order.PreparationEndTime ?? (order.ScheduledTime.HasValue ? order.ScheduledTime : DateTime.Now.AddMinutes(30));
+                                var endTime = order.PreparationEndTime ?? (order.ScheduledTime.HasValue ? order.ScheduledTime : DateTime.Now.AddMinutes(10));
                                 var timeLeft = endTime - DateTime.Now;
                                 if (timeLeft.HasValue && timeLeft.Value.TotalMilliseconds > 0)
                                 {
@@ -95,7 +95,7 @@
                             {
                                 <form method="post" asp-action="IncreasePreparationTimer" asp-route-orderId="@order.Id">
                                     <div class="input-group mt-1">
-                                        <input type="number" class="form-control form-control-sm" name="additionalMinutes" placeholder="Add mins" value="10">
+                                        <input type="number" min="1" class="form-control form-control-sm" name="additionalMinutes" placeholder="Add mins" value="10">
                                         <button type="submit" class="btn btn-sm btn-outline-secondary">Add Time</button>
                                     </div>
                                 </form>
