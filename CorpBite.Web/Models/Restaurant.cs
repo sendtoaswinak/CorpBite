@@ -1,4 +1,4 @@
-﻿// Restaurant.cs
+﻿
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -22,7 +22,7 @@ namespace CorpBite.Models
         public Location Location { get; set; }
 
         public ICollection<MenuItem> MenuItems { get; set; }
-        public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedOn { get; set; } = DateTime.Now;
         public DateTime? UpdatedOn { get; set; }
         public string Description { get; internal set; }
     }

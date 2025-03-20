@@ -8,7 +8,7 @@ namespace CorpBite.ViewModels.FeedbackViewModels
         [Display(Name = "Menu Item")]
         public int MenuItemId { get; set; }
 
-        public string MenuItemName { get; set; } // For display purposes
+        public string MenuItemName { get; set; } 
 
         [Required]
         [Range(1, 5, ErrorMessage = "Rating must be between 1 and 5.")]

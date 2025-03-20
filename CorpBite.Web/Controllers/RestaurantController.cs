@@ -49,7 +49,6 @@ namespace CorpBite.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Get the ID of the currently logged-in user
                 var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
                 if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int adminUserId))
                 {
@@ -58,13 +57,12 @@ namespace CorpBite.Controllers
                         Name = model.Name,
                         Description = model.Description,
                         LocationId = model.LocationId,
-                        AdminUserId = adminUserId // Set the AdminUserId
+                        AdminUserId = adminUserId
                     };
                     _context.Restaurants.Add(restaurant);
                     await _context.SaveChangesAsync();
                     return RedirectToAction("Index");
                 }
-                // If we can't get the user ID, add an error to the model state
                 ModelState.AddModelError(string.Empty, "Could not retrieve the current user's ID.");
             }
             ViewBag.Locations = new SelectList(await _context.Locations.ToListAsync(), "Id", "BuildingName", model.LocationId);
@@ -104,7 +102,7 @@ namespace CorpBite.Controllers
                 restaurant.Name = model.Name;
                 restaurant.Description = model.Description;
                 restaurant.LocationId = model.LocationId;
-                restaurant.UpdatedOn = System.DateTime.UtcNow;
+                restaurant.UpdatedOn = System.DateTime.Now;
                 _context.Restaurants.Update(restaurant);
                 await _context.SaveChangesAsync();
                 return RedirectToAction("Index");
@@ -241,7 +239,7 @@ namespace CorpBite.Controllers
                 menuItem.Price = model.Price;
                 menuItem.Category = model.Category;
                 menuItem.IsActive = model.IsActive;
-                menuItem.UpdatedOn = System.DateTime.UtcNow;
+                menuItem.UpdatedOn = System.DateTime.Now;
 
                 _context.MenuItems.Update(menuItem);
                 await _context.SaveChangesAsync();
@@ -262,7 +260,7 @@ namespace CorpBite.Controllers
             }
 
             menuItem.IsActive = true;
-            menuItem.UpdatedOn = System.DateTime.UtcNow;
+            menuItem.UpdatedOn = System.DateTime.Now;
             _context.MenuItems.Update(menuItem);
             await _context.SaveChangesAsync();
 
@@ -280,7 +278,7 @@ namespace CorpBite.Controllers
             }
 
             menuItem.IsActive = false;
-            menuItem.UpdatedOn = System.DateTime.UtcNow;
+            menuItem.UpdatedOn = System.DateTime.Now;
             _context.MenuItems.Update(menuItem);
             await _context.SaveChangesAsync();
 

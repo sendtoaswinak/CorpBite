@@ -1,8 +1,4 @@
-﻿// Current timestamp: 2025-03-14 09:01:16
-// Current user: sendtoaswinak
-
-// Initialize tooltips and popovers
-document.addEventListener('DOMContentLoaded', function () {
+﻿document.addEventListener('DOMContentLoaded', function () {
     var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
     tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl);
@@ -14,7 +10,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-// Cart functions
+
 const cart = {
     addItem: function (menuItemId, quantity, instructions) {
         return $.post('/Cart/Add', {
@@ -42,7 +38,7 @@ const cart = {
     }
 };
 
-// Rating functions
+
 function initializeRating(containerId) {
     const container = document.getElementById(containerId);
     const stars = container.getElementsByClassName('rating-star');
@@ -70,7 +66,7 @@ function updateStars(stars, rating) {
     });
 }
 
-// Form validation
+
 function validateForm(formId) {
     const form = document.getElementById(formId);
     if (!form) return true;
@@ -90,7 +86,6 @@ function validateForm(formId) {
     return isValid;
 }
 
-// Alert messages
 function showAlert(message, type = 'success') {
     const alertHtml = `
         <div class="alert alert-${type} alert-dismissible fade show" role="alert">
@@ -108,7 +103,7 @@ function showAlert(message, type = 'success') {
     }, 5000);
 }
 
-// Handle favorite items
+
 function toggleFavorite(menuItemId) {
     return $.post('/Menu/ToggleFavorite', { menuItemId })
         .done(response => {
@@ -121,7 +116,7 @@ function toggleFavorite(menuItemId) {
         });
 }
 
-// Format currency
+
 function formatCurrency(amount) {
     return new Intl.NumberFormat('en-IN', {
         style: 'currency',
@@ -129,7 +124,7 @@ function formatCurrency(amount) {
     }).format(amount);
 }
 
-// Format date
+
 function formatDate(dateString) {
     return new Date(dateString).toLocaleDateString('en-IN', {
         year: 'numeric',

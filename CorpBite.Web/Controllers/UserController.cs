@@ -43,7 +43,7 @@ namespace CorpBite.Controllers
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 Role = user.Role,
-                Location = user.Location?.BuildingName + " - " + user.Location?.FloorNumber // Display location
+                Location = user.Location?.BuildingName + " - " + user.Location?.FloorNumber 
             };
 
             return View(model);
@@ -62,7 +62,6 @@ namespace CorpBite.Controllers
                 return NotFound();
             }
 
-            // Get all locations from the database
             var locations = await _context.Locations
                 .Select(l => new SelectListItem
                 {
@@ -98,7 +97,7 @@ namespace CorpBite.Controllers
 
                 user.FirstName = model.FirstName;
                 user.LastName = model.LastName;
-                user.LocationId = model.LocationId; // Update the location
+                user.LocationId = model.LocationId;
                 user.UpdatedOn = DateTime.Now;
 
                 _context.Update(user);
@@ -107,8 +106,6 @@ namespace CorpBite.Controllers
                 return RedirectToAction("Profile");
             }
 
-            // If we got this far, something failed, redisplay form
-            // Reload the locations list
             model.AvailableLocations = await _context.Locations
                 .Select(l => new SelectListItem
                 {
@@ -153,13 +150,12 @@ namespace CorpBite.Controllers
                     return View(model);
                 }
 
-                // Hash the new password
                 using var newHmac = new HMACSHA256();
                 var newPasswordSalt = newHmac.Key;
                 var newPasswordHash = newHmac.ComputeHash(Encoding.UTF8.GetBytes(model.NewPassword));
 
                 user.PasswordHash = Convert.ToBase64String(newPasswordHash) + "|" + Convert.ToBase64String(newPasswordSalt);
-                user.UpdatedOn = DateTime.UtcNow;
+                user.UpdatedOn = DateTime.Now;
 
                 _context.Update(user);
                 await _context.SaveChangesAsync();
@@ -197,7 +193,7 @@ namespace CorpBite.Controllers
         [Authorize(Roles = "Admin")]
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(RegisterViewModel model) // Using RegisterViewModel for simplicity
+        public async Task<IActionResult> Create(RegisterViewModel model) 
         {
             if (ModelState.IsValid)
             {
@@ -218,7 +214,7 @@ namespace CorpBite.Controllers
                     PasswordHash = Convert.ToBase64String(passwordHash) + "|" + Convert.ToBase64String(passwordSalt),
                     FirstName = model.FirstName,
                     LastName = model.LastName,
-                    Role = "Employee" // Default role when created by admin
+                    Role = "Employee"
                 };
 
                 _context.Users.Add(newUser);
@@ -239,7 +235,7 @@ namespace CorpBite.Controllers
                 return NotFound();
             }
 
-            var model = new RegisterViewModel // Reusing for simplicity, adjust if needed
+            var model = new RegisterViewModel
             {
                 Email = user.Email,
                 FirstName = user.FirstName,
@@ -261,10 +257,9 @@ namespace CorpBite.Controllers
                     return NotFound();
                 }
 
-                // Only allow editing of FirstName and LastName for now
                 user.FirstName = model.FirstName;
                 user.LastName = model.LastName;
-                user.UpdatedOn = System.DateTime.UtcNow;
+                user.UpdatedOn = System.DateTime.Now;
 
                 _context.Update(user);
                 await _context.SaveChangesAsync();

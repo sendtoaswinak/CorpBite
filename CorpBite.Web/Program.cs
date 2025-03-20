@@ -11,33 +11,29 @@ builder.Services.AddAuthentication("applicationCookie")
     {
         options.LoginPath = "/Auth/Login";
         options.LogoutPath = "/Auth/Logout";
-        options.AccessDeniedPath = "/Home/AccessDenied"; // Optional
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(60); // Adjust as needed
+        options.AccessDeniedPath = "/Home/AccessDenied"; 
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
         options.SlidingExpiration = true;
         options.Cookie.HttpOnly = true;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // For HTTPS
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
     });
 
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(60); // Adjust as needed
+    options.IdleTimeout = TimeSpan.FromMinutes(60); 
     options.Cookie.HttpOnly = true;
     options.Cookie.IsEssential = true;
 });
 
-// Configure DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Add other services as needed
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
@@ -47,7 +43,7 @@ app.UseStaticFiles();
 app.UseRouting();
 app.UseSession();
 app.UseAuthentication();
-app.UseAuthorization(); // Make sure this is after UseRouting
+app.UseAuthorization(); 
 
 app.MapControllerRoute(
     name: "default",

@@ -14,7 +14,7 @@ namespace CorpBite.Models
         public int? PreferredLocationId { get; set; }
         public Location PreferredLocation { get; set; }
 
-        public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedOn { get; set; } = DateTime.Now;
         public DateTime? UpdatedOn { get; set; }
     }
 }

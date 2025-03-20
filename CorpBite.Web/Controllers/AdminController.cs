@@ -32,36 +32,44 @@ namespace CorpBite.Controllers
         {
             var restaurantsQuery = _context.Restaurants.Include(r => r.Location);
             var menuItemsQuery = _context.MenuItems.Include(m => m.Restaurant);
-
-            if (!string.IsNullOrEmpty(building))
+            try
             {
-                restaurantsQuery = (IIncludableQueryable<Restaurant, Location>)restaurantsQuery.Where(r => r.Location.BuildingName.Contains(building));
+                if (!string.IsNullOrEmpty(building))
+                {
+                    restaurantsQuery = (IIncludableQueryable<Restaurant, Location>)restaurantsQuery.Where(r => r.Location.BuildingName.Contains(building));
+                }
+
+                if (!string.IsNullOrEmpty(floor))
+                {
+                    restaurantsQuery = (IIncludableQueryable<Restaurant, Location>)restaurantsQuery.Where(r => r.Location.FloorNumber.Contains(floor));
+                }
+
+                if (!string.IsNullOrEmpty(menuItemName))
+                {
+                    menuItemsQuery = (IIncludableQueryable<MenuItem, Restaurant>)menuItemsQuery.Where(m => m.Name.Contains(menuItemName));
+                }
+
+                if (!string.IsNullOrEmpty(menuItemCategory))
+                {
+                    menuItemsQuery = (IIncludableQueryable<MenuItem, Restaurant>)menuItemsQuery.Where(m => m.Category.Contains(menuItemCategory));
+                }
+
+                if (menuItemRestaurant.HasValue)
+                {
+                    menuItemsQuery = (IIncludableQueryable<MenuItem, Restaurant>)menuItemsQuery.Where(m => m.RestaurantId == menuItemRestaurant.Value);
+                }
+            }
+            catch
+            {
+                return RedirectToAction("Dashboard", "Admin");
             }
 
-            if (!string.IsNullOrEmpty(floor))
-            {
-                restaurantsQuery = (IIncludableQueryable<Restaurant, Location>)restaurantsQuery.Where(r => r.Location.FloorNumber.Contains(floor));
-            }
-
-            if (!string.IsNullOrEmpty(menuItemName))
-            {
-                menuItemsQuery = (IIncludableQueryable<MenuItem, Restaurant>)menuItemsQuery.Where(m => m.Name.Contains(menuItemName));
-            }
-
-            if (!string.IsNullOrEmpty(menuItemCategory))
-            {
-                menuItemsQuery = (IIncludableQueryable<MenuItem, Restaurant>)menuItemsQuery.Where(m => m.Category.Contains(menuItemCategory));
-            }
-
-            if (menuItemRestaurant.HasValue)
-            {
-                menuItemsQuery = (IIncludableQueryable<MenuItem, Restaurant>)menuItemsQuery.Where(m => m.RestaurantId == menuItemRestaurant.Value);
-            }
+            
 
             // Fetch Active Orders
             var activeOrders = await _context.Orders
                 .Include(o => o.User)
-                .Where(o => o.OrderStatus == "Preparing" || o.OrderStatus == "Ready to pick") // Adjust status as needed
+                .Where(o => o.OrderStatus == "Preparing" || o.OrderStatus == "Ready to pick" || o.OrderStatus == "Pending") // Adjust status as needed
                 .OrderByDescending(o => o.OrderDate)
                 .ToListAsync();
 
@@ -123,20 +131,20 @@ namespace CorpBite.Controllers
                 order.OrderStatus = orderStatus;
                 if (orderStatus == "Preparing" && !order.PreparationStartTime.HasValue)
                 {
-                    order.PreparationStartTime = DateTime.UtcNow;
+                    order.PreparationStartTime = DateTime.Now;
                 }
                 else if (orderStatus == "Ready to pick" && order.PreparationStartTime.HasValue && !order.PreparationEndTime.HasValue)
                 {
-                    order.PreparationEndTime = DateTime.UtcNow;
+                    order.PreparationEndTime = DateTime.Now;
                 }
                 else if (orderStatus == "Completed")
                 {
-                    order.PreparationEndTime = DateTime.UtcNow; // Consider setting this when marked as completed
+                    order.PreparationEndTime = DateTime.Now; 
                 }
-                order.UpdatedOn = DateTime.UtcNow;
+                order.UpdatedOn = DateTime.Now;
                 _context.Update(order);
                 await _context.SaveChangesAsync();
-                return RedirectToAction("ActiveOrders"); // Or wherever you want to redirect
+                return RedirectToAction("ActiveOrders"); 
             }
             return NotFound();
         }
@@ -149,19 +157,18 @@ namespace CorpBite.Controllers
             {
                 if (!order.PreparationEndTime.HasValue)
                 {
-                    // If preparation hasn't ended, extend the end time
-                    order.PreparationEndTime = order.PreparationEndTime?.AddMinutes(additionalMinutes) ?? DateTime.UtcNow.AddMinutes(additionalMinutes);
+                   
+                    order.PreparationEndTime = order.PreparationEndTime?.AddMinutes(additionalMinutes) ?? DateTime.Now.AddMinutes(additionalMinutes);
                 }
                 else
                 {
-                    // If preparation has ended, you might want to extend the scheduled pick-up time
                     order.ScheduledTime = order.ScheduledTime?.AddMinutes(additionalMinutes);
                 }
                 order.PreparationTimeExtension = (order.PreparationTimeExtension ?? TimeSpan.Zero) + TimeSpan.FromMinutes(additionalMinutes);
-                order.UpdatedOn = DateTime.UtcNow;
+                order.UpdatedOn = DateTime.Now;
                 _context.Update(order);
                 await _context.SaveChangesAsync();
-                return RedirectToAction("ActiveOrders"); // Or wherever you want to redirect
+                return RedirectToAction("ActiveOrders");
             }
             return NotFound();
         }

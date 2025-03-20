@@ -85,7 +85,6 @@ namespace CorpBite.Controllers
             }
             else
             {
-                // Redirect to the main browse page if no preferred location is set
                 return RedirectToAction("Create");
             }
         }
@@ -118,7 +117,7 @@ namespace CorpBite.Controllers
             }
 
             SaveCartToSession(cart);
-            return RedirectToAction("Create", new { locationId = menuItem.RestaurantId }); // Redirect back to the menu
+            return RedirectToAction("Create", new { locationId = menuItem.RestaurantId }); 
         }
 
         [HttpGet]
@@ -195,7 +194,7 @@ namespace CorpBite.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Checkout(string paymentMethod) // For immediate orders
+        public async Task<IActionResult> Checkout(string paymentMethod)
         {
             var cart = GetCartFromSession();
             if (!cart.Any())
@@ -203,9 +202,6 @@ namespace CorpBite.Controllers
                 ModelState.AddModelError("", "Your plate is empty.");
                 return RedirectToAction("Cart");
             }
-
-            // In a real application, you would integrate with a payment gateway here.
-            // For this example, we'll just record the payment method.
 
             return await ProcessOrder(cart, null, paymentMethod);
         }
@@ -243,7 +239,7 @@ namespace CorpBite.Controllers
                         OrderId = order.Id,
                         MenuItemId = item.MenuItemId,
                         Quantity = item.Quantity,
-                        Price = item.Price // Use the price at the time of ordering
+                        Price = item.Price
                     };
                     _context.OrderItems.Add(orderItem);
                 }

@@ -22,11 +22,11 @@ namespace CorpBite.Models
         [Column(TypeName = "decimal(18,0)")]
         public decimal Price { get; set; }
 
-        public string Category { get; set; } // e.g., Veg, Non-Veg, Drinks
+        public string Category { get; set; } 
 
         public bool IsActive { get; set; } = true;
 
-        public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedOn { get; set; } = DateTime.Now;
         public DateTime? UpdatedOn { get; set; }
     }
 }

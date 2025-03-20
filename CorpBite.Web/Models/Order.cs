@@ -15,7 +15,7 @@ namespace CorpBite.Models
 
         public DateTime OrderDate { get; set; } = DateTime.Now;
 
-        public string OrderStatus { get; set; } // e.g., Pending, Preparing, Ready to pick, Completed, Cancelled, Scheduled
+        public string OrderStatus { get; set; } 
 
         [Required]
         [Column(TypeName = "decimal(18,0)")]
@@ -25,13 +25,12 @@ namespace CorpBite.Models
 
         public DateTime? ScheduledTime { get; set; }
 
-        // New Properties for Order Preparation
         public DateTime? PreparationStartTime { get; set; }
         public DateTime? PreparationEndTime { get; set; }
         public TimeSpan? PreparationTimeExtension { get; set; }
 
         public ICollection<OrderItem> OrderItems { get; set; }
-        public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedOn { get; set; } = DateTime.Now;
         public DateTime? UpdatedOn { get; set; }
     }
 }

@@ -20,7 +20,6 @@ namespace CorpBite.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Configure relationships and constraints here if needed
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.Email)
                 .IsUnique();

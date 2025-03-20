@@ -11,6 +11,6 @@ namespace CorpBite.ViewModels.RestaurantViewModels
         [Required]
         [Display(Name = "Location")]
         public int LocationId { get; set; }
-        public string LocationName { get; set; } // For display
+        public string LocationName { get; set; } 
     }
 }

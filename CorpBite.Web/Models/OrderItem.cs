@@ -22,9 +22,9 @@ namespace CorpBite.Models
         [Required]
 
         [Column(TypeName = "decimal(18,0)")]
-        public decimal Price { get; set; } // Price at the time of ordering
+        public decimal Price { get; set; } 
 
-        public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedOn { get; set; } = DateTime.Now;
         public DateTime? UpdatedOn { get; set; }
     }
 }

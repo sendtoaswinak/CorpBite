@@ -13,7 +13,7 @@ namespace CorpBite.ViewModels.AdminViewModels
         public string FloorFilter { get; set; }
         public string MenuItemNameFilter { get; set; }
         public string MenuItemCategoryFilter { get; set; }
-        public int? MenuItemRestaurantFilter { get; set; } // Filter by Restaurant ID
-        public List<Restaurant> AllRestaurants { get; set; } // For the Restaurant filter dropdown
+        public int? MenuItemRestaurantFilter { get; set; } 
+        public List<Restaurant> AllRestaurants { get; set; } 
     }
 }

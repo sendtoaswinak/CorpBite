@@ -20,7 +20,7 @@ namespace CorpBite.Models
 
         public string Comment { get; set; }
 
-        public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedOn { get; set; } = DateTime.Now;
         public DateTime? UpdatedOn { get; set; }
     }
 }

@@ -15,11 +15,10 @@ namespace CorpBite.Models
         public string FirstName { get; set; }
         [Required]
         public string LastName { get; set; }
-        public string Role { get; set; } = "Employee"; // Default role
-        public DateTime CreatedOn { get; set; } = DateTime.UtcNow;
-        public DateTime UpdatedOn { get; set; } = DateTime.UtcNow;
+        public string Role { get; set; } = "Employee";
+        public DateTime CreatedOn { get; set; } = DateTime.Now;
+        public DateTime UpdatedOn { get; set; } = DateTime.Now;
 
-        // Navigation properties
         public int? LocationId { get; set; }
         public Location Location { get; set; }
     }

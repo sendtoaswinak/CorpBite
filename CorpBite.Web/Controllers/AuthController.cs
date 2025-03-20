@@ -39,7 +39,6 @@ namespace CorpBite.Controllers
                     return View(model);
                 }
 
-                // Password hashing
                 using var hmac = new HMACSHA256();
                 var passwordSalt = hmac.Key;
                 var passwordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(model.Password));
@@ -50,14 +49,14 @@ namespace CorpBite.Controllers
                     PasswordHash = Convert.ToBase64String(passwordHash) + "|" + Convert.ToBase64String(passwordSalt),
                     FirstName = model.FirstName,
                     LastName = model.LastName,
-                    Role = "Employee" // Set default role
+                    Role = "Employee" 
                     
                 };
 
                 _context.Users.Add(newUser);
                 await _context.SaveChangesAsync();
 
-                // Authenticate the user after registration
+
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.NameIdentifier, newUser.Id.ToString()),

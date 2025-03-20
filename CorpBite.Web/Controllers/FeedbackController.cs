@@ -35,7 +35,7 @@ namespace CorpBite.Controllers
                 }
             }
 
-            // Populate the dropdown for menu items
+           
             ViewBag.MenuItems = new SelectList(await _context.MenuItems.ToListAsync(), "Id", "Name", viewModel.MenuItemId);
 
             return View(viewModel);
@@ -60,11 +60,9 @@ namespace CorpBite.Controllers
                 await _context.SaveChangesAsync();
 
                 ViewBag.Message = "Thank you for your feedback!";
-                // Optionally redirect to a confirmation page or back to the menu
                 return View(model);
             }
 
-            // Repopulate the dropdown if the model is invalid
             ViewBag.MenuItems = new SelectList(await _context.MenuItems.ToListAsync(), "Id", "Name", model.MenuItemId);
             return View(model);
         }
@@ -74,7 +72,6 @@ namespace CorpBite.Controllers
         public async Task<IActionResult> ViewEmployeeFeedback()
         {
             var employeeId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier));
-            // For now, let's show all feedback to employees (as per requirement "Employees can view other employee reviews")
             var feedback = await _context.Reviews
                 .Include(r => r.User)
                 .Include(r => r.MenuItem)
@@ -88,7 +85,6 @@ namespace CorpBite.Controllers
         [HttpGet]
         public async Task<IActionResult> ViewAdminFeedback()
         {
-            // Admin can view all feedback
             var feedback = await _context.Reviews
                 .Include(r => r.User)
                 .Include(r => r.MenuItem)
